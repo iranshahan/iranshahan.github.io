@@ -657,6 +657,20 @@ async function waitTx(txid) {
   }
   const e = new Error('The network has not confirmed yet. Check the transaction before trying again.'); e.txid = txid; throw e;
 }
+// Build, sign in TronLink and broadcast a contract call.
+// The transaction stays valid for about 10 minutes, so a buyer who takes a while
+// to read the TronLink window does not get "Transaction expired".
+async function sendTx(addr, sel, params, feeLimit) {
+  const tw = state.tw;
+  const b = await tw.transactionBuilder.triggerSmartContract(addr, sel, { feeLimit, callValue: 0 }, params, state.me);
+  if (!b || !b.result || !b.result.result || !b.transaction) throw new Error('Could not prepare the transaction. Nothing was charged. Please try again.');
+  let tx = b.transaction;
+  try { tx = await tw.transactionBuilder.extendExpiration(tx, 540); } catch (e) { /* keep the default expiry */ }
+  const signed = await tw.trx.sign(tx);
+  const r = await tw.trx.sendRawTransaction(signed);
+  if (!r || !r.result) throw new Error('The network did not accept the transaction (' + (hexText((r && r.message) || '') || (r && r.code) || 'unknown') + '). Nothing was charged.');
+  return signed.txID;
+}
 function sendErr(e) {
   const m = (e && (e.message || e.error)) || String(e);
   if (/declined|reject|cancel|denied/i.test(m)) return 'You cancelled in TronLink. Nothing was charged.';
@@ -684,12 +698,12 @@ async function buyFlow() {
       if (state.allowance > 0n) {
         $('buyBtn').textContent = 'Resetting the old allowance…';
         setStatus('Confirm in TronLink: reset the previous allowance first.', 'info');
-        const t0 = await usdC().approve(NET.token, '0').send({ feeLimit: CONFIG.fees.approve, callValue: 0, shouldPollResponse: false });
+        const t0 = await sendTx(NET.usdt, 'approve(address,uint256)', [{ type: 'address', value: NET.token }, { type: 'uint256', value: '0' }], CONFIG.fees.approve);
         await waitTx(t0);
       }
       $('buyBtn').textContent = 'Waiting for TronLink…';
       setStatus('Confirm in TronLink: allow the souvenir contract to take ' + usdText(need) + '.', 'info');
-      const t1 = await usdC().approve(NET.token, need.toString()).send({ feeLimit: CONFIG.fees.approve, callValue: 0, shouldPollResponse: false });
+      const t1 = await sendTx(NET.usdt, 'approve(address,uint256)', [{ type: 'address', value: NET.token }, { type: 'uint256', value: need.toString() }], CONFIG.fees.approve);
       $('buyBtn').textContent = 'Allowing…';
       await waitTx(t1);
       state.allowance = need;
@@ -697,7 +711,7 @@ async function buyFlow() {
     $('pg1').className = 'done'; $('pg2').className = 'now';
     $('buyBtn').textContent = 'Waiting for TronLink…';
     setStatus('Confirm in TronLink: buy ' + q + ' for ' + usdText(need) + '.', 'info');
-    const t2 = await epC().buy(q, priceSeen.toString()).send({ feeLimit: CONFIG.fees.buy, callValue: 0, shouldPollResponse: false });
+    const t2 = await sendTx(NET.token, 'buy(uint256,uint256)', [{ type: 'uint256', value: String(q) }, { type: 'uint256', value: priceSeen.toString() }], CONFIG.fees.buy);
     $('buyBtn').textContent = 'Buying…';
     const info = await waitTx(t2);
     $('pg2').className = 'done';
@@ -732,7 +746,7 @@ async function faucet() {
   state.busy = true; render();
   try {
     setStatus('Confirm in TronLink to receive 100 test dollars.', 'info');
-    const t = await usdC().faucet(100).send({ feeLimit: CONFIG.fees.faucet, callValue: 0, shouldPollResponse: false });
+    const t = await sendTx(NET.usdt, 'faucet(uint256)', [{ type: 'uint256', value: '100' }], CONFIG.fees.faucet);
     await waitTx(t);
     setStatus('100 test dollars added. ' + txLink(t), 'ok', true);
   } catch (e) {
