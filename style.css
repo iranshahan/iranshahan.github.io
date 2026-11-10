@@ -264,3 +264,5 @@ html[lang="fa"] .years small { letter-spacing: 0; }
 .souvenir-note { margin-top: 32px; max-width: 880px; padding: 22px 26px; border: 1px solid var(--line); border-inline-start: 3px solid var(--gold); border-radius: 16px; background: rgba(10, 19, 41, 0.5); }
 .souvenir-note h3 { font-size: 26px; color: var(--gold-hi); }
 .souvenir-note p { margin-top: 8px; color: var(--ink-2); }
+
+.coin-intro { margin-top: 16px; max-width: 780px; font-size: 18px; color: var(--ink-2); }
