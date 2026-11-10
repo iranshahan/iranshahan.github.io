@@ -47,6 +47,7 @@ const WORDS = {
     giftYes: (g) => 'You qualify for a free extra souvenir if you are among the first 25 buyers of 5 or more (' + g + ' gifts left).',
     giftMore: (g) => 'Buy 5 or more in one purchase for a free extra souvenir (' + g + ' gifts left).',
     giftNone: 'All 25 gifts have been given.',
+    giftCreator: 'This is the creator\'s wallet. Purchases from it never receive gifts, so every gift stays for buyers.',
     soon: 'Sale opens soon',
     waitFoundation: 'Sale opens once the foundation wallet is set',
     connectToBuy: 'Connect your wallet to buy',
@@ -101,6 +102,7 @@ const WORDS = {
     giftYes: (g) => 'اگر جزو ۲۵ نفر اولی باشید که ۵ یادبود یا بیشتر می‌خرند، یک یادبود اضافه هدیه می‌گیرید (' + g + ' هدیه مانده).',
     giftMore: (g) => 'با خرید ۵ یادبود یا بیشتر در یک خرید، یک یادبود اضافه هدیه بگیرید (' + g + ' هدیه مانده).',
     giftNone: 'هر ۲۵ هدیه داده شده است.',
+    giftCreator: 'این کیف پول سازنده است. خرید از این کیف پول هدیه نمی‌گیرد تا همه‌ی هدیه‌ها برای خریداران بماند.',
     soon: 'فروش به‌زودی آغاز می‌شود',
     waitFoundation: 'فروش پس از ثبت کیف پول بنیاد آغاز می‌شود',
     connectToBuy: 'برای خرید، کیف پولتان را وصل کنید',
@@ -157,7 +159,7 @@ const fmtUsd = new Intl.NumberFormat(LANG === 'fa' ? 'fa-IR' : 'en-US', { maximu
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const USD_DEC = 1000000n;
 
-const state = { price: 10n * USD_DEC, next: 101n, gifts: 25n, batchLeft: 100000n, toFound: 0n, foundAddr: '', tw: null, me: null, usd: 0n, trx: 0n, ep: 0n, allowance: 0n, busy: false };
+const state = { price: 10n * USD_DEC, next: 101n, gifts: 25n, batchLeft: 100000n, toFound: 0n, foundAddr: '', ownerHex: '', treasuryHex: '', tw: null, me: null, usd: 0n, trx: 0n, ep: 0n, allowance: 0n, busy: false };
 
 /* ---------- small helpers ---------- */
 const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
@@ -212,11 +214,12 @@ async function view(selector, paramHex) {
 async function loadFigures() {
   if (!NET.token) return render();
   try {
-    const [price, next, gifts, left, toFound, fWord] = await Promise.all([
+    const [price, next, gifts, left, toFound, fWord, oWord, tWord] = await Promise.all([
       view('pricePerToken()'), view('nextNumber()'), view('giftsRemaining()'), view('saleRemainingInBatch()'),
-      view('totalToFoundation()'), view('foundation()')
+      view('totalToFoundation()'), view('foundation()'), view('owner()'), view('treasury()')
     ]);
-    Object.assign(state, { price, next, gifts, batchLeft: left, toFound });
+    const word = (w) => w.toString(16).padStart(40, '0');
+    Object.assign(state, { price, next, gifts, batchLeft: left, toFound, ownerHex: word(oWord), treasuryHex: word(tWord) });
     state.foundAddr = fWord === 0n ? '' : await hexToB58('41' + fWord.toString(16).padStart(40, '0'));
   } catch (e) { /* keep the published defaults if the network is slow */ }
   render();
@@ -244,7 +247,10 @@ function render() {
   if (state.foundAddr) $('foundAddr').textContent = state.foundAddr;
   const hint = $('giftHint');
   const g = fmt.format(Number(state.gifts));
-  if (state.gifts > 0n && q >= 5) { hint.className = 'gift-hint'; hint.textContent = T.giftYes(g); }
+  let meHex = '';
+  try { meHex = state.me ? b58hex(state.me).slice(2).toLowerCase() : ''; } catch (e) { /* not a TRON address */ }
+  if (meHex && (meHex === state.ownerHex || meHex === state.treasuryHex)) { hint.className = 'gift-hint off'; hint.textContent = T.giftCreator; }
+  else if (state.gifts > 0n && q >= 5) { hint.className = 'gift-hint'; hint.textContent = T.giftYes(g); }
   else if (state.gifts > 0n) { hint.className = 'gift-hint off'; hint.textContent = T.giftMore(g); }
   else { hint.className = 'gift-hint off'; hint.textContent = T.giftNone; }
 
