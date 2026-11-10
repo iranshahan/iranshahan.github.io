@@ -266,3 +266,11 @@ html[lang="fa"] .years small { letter-spacing: 0; }
 .souvenir-note p { margin-top: 8px; color: var(--ink-2); }
 
 .coin-intro { margin-top: 16px; max-width: 780px; font-size: 18px; color: var(--ink-2); }
+
+/* 2585: the year we wish for */
+.wish { text-align: center; background: radial-gradient(ellipse 60% 70% at 50% 42%, rgba(226,174,62,0.2), transparent 70%), #08102A; border-top: 1px solid var(--line); }
+.wish .wrap { max-width: 860px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.wish .big { font-family: var(--display); font-weight: 600; font-size: clamp(110px, 20vw, 220px); line-height: 0.95; background: linear-gradient(180deg, #FFF1C8 0%, var(--gold) 55%, var(--gold-lo) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 18px 40px rgba(226,174,62,0.25)); }
+.wish p:not(.caps):not(.big) { font-size: clamp(18px, 2vw, 21px); color: var(--ink-2); max-width: 40em; }
+.wish p.first { color: var(--ink); }
+.wish .btn { margin-top: 10px; }
