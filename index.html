@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Iran Shahan</title>
-<meta name="description" content="Iran Shahan (EP): a numbered digital souvenir on TRON. 53 years of building, in memory of the javidnam.">
+<meta name="description" content="Iran Shahan (EP): a numbered digital souvenir on TRON. 53 years of building, in memory of the javidnaman of the road to freedom.">
 <link rel="icon" type="image/png" sizes="64x64" href="logo-64.png">
 <link rel="apple-touch-icon" href="logo-180.png">
 <meta property="og:title" content="Iran Shahan">
-<meta property="og:description" content="A numbered digital souvenir on TRON. 53 years of building, in memory of the javidnam.">
+<meta property="og:description" content="A numbered digital souvenir on TRON. 53 years of building, in memory of the javidnaman of the road to freedom.">
 <meta property="og:image" content="logo-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -115,6 +115,31 @@ section { padding-block: clamp(64px, 9vw, 112px); }
 .story .body p:first-child::first-letter { font-family: var(--display); font-size: 3.4em; float: left; line-height: 0.82; padding: 6px 10px 0 0; color: var(--gold-hi); }
 .years { font-family: var(--display); font-size: clamp(64px, 10vw, 120px); line-height: 0.95; color: var(--gold); margin-top: 18px; }
 .years small { display: block; font-family: var(--body); font-size: 15px; color: var(--ink-3); margin-top: 10px; letter-spacing: 0.02em; }
+
+/* the fifty-three years */
+.era { background: linear-gradient(180deg, var(--night) 0%, #0B1532 55%, var(--night) 100%); border-top: 1px solid var(--line); }
+.era .head { max-width: 780px; }
+.era .intro { margin-top: 18px; font-size: 19px; color: var(--ink-2); }
+.era .intro .fa { color: var(--gold-hi); }
+.timeline { list-style: none; margin: 56px 0 0; padding: 0; position: relative; max-width: 900px; }
+.timeline::before { content: ""; position: absolute; left: 140px; top: 10px; bottom: 10px; width: 1px; background: linear-gradient(180deg, transparent, var(--gold) 6%, var(--gold) 94%, transparent); opacity: .55; }
+.timeline li { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 56px; padding-block: 20px; position: relative; }
+.timeline li::after { content: ""; position: absolute; left: 135px; top: 34px; width: 11px; height: 11px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 5px rgba(226, 174, 62, 0.14); }
+.timeline .yr { font-family: var(--display); font-weight: 600; font-size: 44px; line-height: 1; color: var(--gold-hi); text-align: right; padding-top: 4px; }
+.timeline h3 { font-size: 24px; }
+.timeline p { margin: 6px 0 0; color: var(--ink-2); max-width: 40em; }
+.timeline li.key { margin-top: 18px; padding: 26px 0; border-top: 1px solid var(--line); }
+.timeline li.key .yr { font-size: 52px; color: var(--gold); }
+.timeline li.key::after { top: 42px; width: 15px; height: 15px; left: 133px; box-shadow: 0 0 0 7px rgba(226, 174, 62, 0.2); }
+.timeline li.key h3 { color: var(--gold-hi); }
+@media (max-width: 640px) {
+  .timeline::before { left: 6px; }
+  .timeline li { grid-template-columns: 1fr; gap: 6px; padding-left: 34px; }
+  .timeline li::after { left: 1px; top: 30px; }
+  .timeline li.key::after { left: -1px; top: 38px; }
+  .timeline .yr { text-align: left; font-size: 34px; }
+  .timeline li.key .yr { font-size: 42px; }
+}
 
 /* memorial band */
 .memorial { background: #070D1E; border-block: 1px solid var(--line); text-align: center; }
@@ -223,6 +248,7 @@ footer p { max-width: 52em; }
     <a class="brand" href="#top"><img src="logo-64.png" alt=""><div><b>Iran Shahan</b><span>EP · TRON</span></div></a>
     <nav class="links" aria-label="Sections">
       <a href="#story">Story</a>
+      <a href="#era">53 years</a>
       <a href="#coin">The coin</a>
       <a href="#edition">Edition</a>
       <a href="#faq">Questions</a>
@@ -239,7 +265,7 @@ footer p { max-width: 52em; }
       <p class="caps">A numbered digital souvenir · 2585</p>
       <h1>Iran Shahan</h1>
       <p class="fa fa-line">پاینده ایران</p>
-      <p class="lede">Fifty-three years of building, struck in gold. Made in memory of the javidnam, the Iranians who gave their lives for a free Iran.</p>
+      <p class="lede">Fifty-three years of building, struck in gold. Made in memory of the javidnaman of the road to freedom, the Iranians who gave their lives for a free Iran.</p>
       <div class="price-row">
         <span class="big num" id="heroPrice">10 USDT</span>
         <span class="small">per souvenir · paid in USDT on TRON (TRC-20)</span>
@@ -281,14 +307,74 @@ footer p { max-width: 52em; }
     <div class="body">
       <p>Between 1925 and 1979, Iran lived through fifty-three years of building. Railways crossed the Zagros and the Alborz. The University of Tehran opened its doors. Roads, dams, schools and factories rose across the country, and Iranian women won the right to vote. A nation that had been held back for generations began to picture its own future.</p>
       <p>Decades later, a new generation went into the streets asking for that future back. In January 2026 the protests that had spread across the country were met with gunfire. Thousands were killed; human rights groups have confirmed thousands of names, and other estimates run far higher. Many were young. Many were never written on any official list.</p>
-      <p>Iranians call them <em>javidnam</em>, the eternal names. Iran Shahan was made so that both are remembered together: the years in which Iran was built, and the people who died believing it could be free again.</p>
+      <p>Iranians call them <em>javidnaman-e rah-e azadi</em>: the eternal names of the road to freedom. Iran Shahan was made so that both are remembered together: the years in which Iran was built, and the people who died believing it could be free again.</p>
     </div>
   </div>
 </section>
 
-<section class="memorial" aria-label="In memory of the javidnam">
+<section class="era" id="era" aria-labelledby="eraTitle">
   <div class="wrap">
-    <p class="fa">جاویدنام</p>
+    <div class="head">
+      <p class="caps">The fifty-three years</p>
+      <h2 id="eraTitle" style="margin-top:12px">What was built, 1925 to 1979</h2>
+      <p class="intro">The back of every Iran Shahan carries one sentence: <bdi class="fa" dir="rtl">۵۳ سال سازندگی، پیشرفت و اقتدار ایرانی</bdi>, fifty-three years of building, progress and Iranian strength. The 53 laurel leaves around its rim stand for those years, one leaf for each. These are some of the moments behind them.</p>
+    </div>
+    <ol class="timeline">
+      <li>
+        <span class="yr num">1925</span>
+        <div><h3>A new beginning</h3><p>Reza Shah is proclaimed king and the Pahlavi era begins. A country worn down by weak government and foreign interference sets out to build a modern state.</p></div>
+      </li>
+      <li>
+        <span class="yr num">1928</span>
+        <div><h3>A bank of its own</h3><p>Bank Melli Iran, the national bank, opens its doors, and work begins on a modern civil code and modern courts.</p></div>
+      </li>
+      <li>
+        <span class="yr num">1934</span>
+        <div><h3>The first modern university</h3><p>The University of Tehran is inaugurated. In 1937 its first women students walk through the gates.</p></div>
+      </li>
+      <li>
+        <span class="yr num">1935</span>
+        <div><h3>Iran, in its own name</h3><p>The government asks the world to stop saying Persia and to use the name Iranians have always used for their country: Iran.</p></div>
+      </li>
+      <li>
+        <span class="yr num">1938</span>
+        <div><h3>From the Caspian to the Gulf</h3><p>The Trans-Iranian Railway is completed: 1,392 kilometres of track and 190 tunnels across the Alborz and the Zagros, joining the Caspian Sea to the Persian Gulf. Iranians paid for it themselves, through taxes on tea and sugar. Since 2021 it has been a UNESCO World Heritage Site.</p></div>
+      </li>
+      <li>
+        <span class="yr num">1941</span>
+        <div><h3>A young Shah</h3><p>Mohammad Reza Shah comes to the throne at twenty-one, in the middle of a world war.</p></div>
+      </li>
+      <li>
+        <span class="yr num">1963</span>
+        <div><h3>The White Revolution</h3><p>Land reform gives farmland to about 1.5 million peasant families. The Literacy Corps sends young graduates to teach in the villages, and the Health Corps sends doctors. Women win the right to vote, and six women are elected to parliament that same year. Through the 1960s and 70s the economy grows by close to 10 percent a year, and literacy rises from about a quarter of the population to more than four in ten.</p></div>
+      </li>
+      <li>
+        <span class="yr num">1968</span>
+        <div><h3>A woman in the cabinet</h3><p>Farrokhroo Parsa becomes Minister of Education, the first woman to sit in an Iranian cabinet.</p></div>
+      </li>
+      <li>
+        <span class="yr num">1971</span>
+        <div><h3>A gate for Tehran</h3><p>The Shahyad Tower, today's Azadi Tower, rises at the western entrance of the capital to mark 2,500 years of Iranian monarchy.</p></div>
+      </li>
+      <li>
+        <span class="yr num">1974</span>
+        <div><h3>Asia comes to Tehran</h3><p>Tehran hosts the Asian Games in the new Aryamehr Stadium, known today as Azadi Stadium.</p></div>
+      </li>
+      <li>
+        <span class="yr num">1976</span>
+        <div><h3>Counting from Cyrus</h3><p>Iran adopts the imperial calendar, which counts from the coronation of Cyrus the Great. The year 1976 becomes 2535.</p></div>
+      </li>
+      <li class="key">
+        <span class="yr num">2585</span>
+        <div><h3>This year</h3><p>Counted the same way, this year is 2585. It is the year struck on the front of every Iran Shahan, under <bdi class="fa" dir="rtl">پاینده ایران</bdi>.</p></div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="memorial" aria-label="In memory of the javidnaman of the road to freedom">
+  <div class="wrap">
+    <p class="fa">جاویدنامان راه آزادی</p>
     <div class="candle-row" aria-hidden="true" id="candles"></div>
     <p class="lead">For every name that was taken, and every name that will not be forgotten.</p>
     <p class="note">Half of the price of every Iran Shahan goes directly to <span class="fName">the foundation</span>, inside the same transaction. The split is written into the contract and can never be changed.</p>
