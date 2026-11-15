@@ -10,7 +10,7 @@ const CONFIG = {
     nile: {
       api: 'https://nile.trongrid.io',
       scan: 'https://nile.tronscan.org/#',
-      token: 'TN7FPajFsq5Pf8srRtExhMUEw79UqN5Dzx',
+      token: '',   // v6 contract not deployed yet. Test with ?token=T... , then put the address here.
       usdt: 'TSveqAL6wB3G8ksZwmptzz1q6gzK1B4Qom',
       testDollars: true
     },
@@ -22,9 +22,6 @@ const CONFIG = {
       testDollars: false
     }
   },
-  // Name and official page of the foundation that receives 50%. Leave empty until confirmed.
-  // name: English name, nameFa: Persian name.
-  foundation: { name: '', nameFa: '', url: '' },
   fees: { approve: 100000000, buy: 250000000, faucet: 60000000 }  // fee limits in SUN (1 TRX = 1,000,000 SUN)
 };
 
@@ -43,13 +40,14 @@ const WORDS = {
     usd: 'USDT',
     net: { nile: 'Nile testnet', mainnet: 'TRON mainnet' },
     viewTx: 'View the transaction',
-    fName: 'the foundation', fNameCap: 'The foundation',
-    giftYes: (g) => 'You qualify for a free extra souvenir if you are among the first 25 buyers of 5 or more (' + g + ' gifts left).',
-    giftMore: (g) => 'Buy 5 or more in one purchase for a free extra souvenir (' + g + ' gifts left).',
-    giftNone: 'All 25 gifts have been given.',
+    wallEmpty: 'No founders yet. Be the first.',
+    giftYes: (g) => 'You qualify for a free extra souvenir and a place on the Founders\' wall if you are among the first 25 buyers of 5 or more (' + g + ' gifts left).',
+    giftMore: (g) => 'Buy 5 or more in one purchase for a free extra souvenir and a place on the Founders\' wall (' + g + ' gifts left).',
+    giftNone: 'All 25 founder gifts have been given.',
     giftCreator: 'This is the creator\'s wallet. Purchases from it never receive gifts, so every gift stays for buyers.',
+    goldenYes: 'Your purchase includes the golden number #2585! With 10 or more you get 3 extra souvenirs free.',
     soon: 'Sale opens soon',
-    waitFoundation: 'Sale opens once the foundation wallet is set',
+    waitFoundation: 'The sale is not ready yet',
     connectToBuy: 'Connect your wallet to buy',
     buyFor: (q, a) => 'Buy ' + q + ' for ' + a,
     allowThenBuy: (a) => 'Allow ' + a + ', then buy',
@@ -83,7 +81,7 @@ const WORDS = {
     buying: 'Buying…',
     done: 'Done. ',
     nSouvenirs: (q) => q + ' souvenir' + (q > 1 ? 's' : ''),
-    giftOne: 'One of them is your gift.',
+    giftN: (n) => 'Plus ' + n + ' free gift souvenir' + (n === '1' ? '' : 's') + ' in your wallet.',
     confirmFaucet: 'Confirm in TronLink to receive 100 test dollars.',
     faucetDone: '100 test dollars added. ',
     capBack: 'Back of the coin. Tap to turn it over',
@@ -98,13 +96,14 @@ const WORDS = {
     usd: 'تتر',
     net: { nile: 'شبکه‌ی آزمایشی Nile', mainnet: 'شبکه‌ی اصلی ترون' },
     viewTx: 'دیدن تراکنش',
-    fName: 'بنیاد', fNameCap: 'بنیاد',
-    giftYes: (g) => 'اگر جزو ۲۵ نفر اولی باشید که ۵ یادبود یا بیشتر می‌خرند، یک یادبود اضافه هدیه می‌گیرید (' + g + ' هدیه مانده).',
-    giftMore: (g) => 'با خرید ۵ یادبود یا بیشتر در یک خرید، یک یادبود اضافه هدیه بگیرید (' + g + ' هدیه مانده).',
-    giftNone: 'هر ۲۵ هدیه داده شده است.',
+    wallEmpty: 'هنوز بنیان‌گذاری نیست. اولین نفر باشید.',
+    giftYes: (g) => 'اگر جزو ۲۵ نفر اولی باشید که ۵ یادبود یا بیشتر می‌خرند، یک یادبود اضافه هدیه و جایی روی دیوار بنیان‌گذاران می‌گیرید (' + g + ' هدیه مانده).',
+    giftMore: (g) => 'با خرید ۵ یادبود یا بیشتر در یک خرید، یک یادبود اضافه هدیه و جایی روی دیوار بنیان‌گذاران بگیرید (' + g + ' هدیه مانده).',
+    giftNone: 'هر ۲۵ هدیه‌ی بنیان‌گذاران داده شده است.',
     giftCreator: 'این کیف پول سازنده است. خرید از این کیف پول هدیه نمی‌گیرد تا همه‌ی هدیه‌ها برای خریداران بماند.',
+    goldenYes: 'خرید شما شماره‌ی طلایی #۲۵۸۵ را دربرمی‌گیرد! با ۱۰ یادبود یا بیشتر، ۳ یادبود اضافه رایگان می‌گیرید.',
     soon: 'فروش به‌زودی آغاز می‌شود',
-    waitFoundation: 'فروش پس از ثبت کیف پول بنیاد آغاز می‌شود',
+    waitFoundation: 'فروش هنوز آماده نیست',
     connectToBuy: 'برای خرید، کیف پولتان را وصل کنید',
     buyFor: (q, a) => 'خرید ' + q + ' یادبود به بهای ' + a,
     allowThenBuy: (a) => 'اجازه‌ی ' + a + '، سپس خرید',
@@ -138,7 +137,7 @@ const WORDS = {
     buying: 'در حال خرید…',
     done: 'انجام شد. ',
     nSouvenirs: (q) => q + ' یادبود',
-    giftOne: 'یکی از آن‌ها هدیه‌ی شماست.',
+    giftN: (n) => n + ' یادبود هدیه‌ی رایگان هم در کیف پولتان است.',
     confirmFaucet: 'برای دریافت ۱۰۰ دلار آزمایشی، در TronLink تأیید کنید.',
     faucetDone: '۱۰۰ دلار آزمایشی اضافه شد. ',
     capBack: 'پشت سکه. برای برگرداندن، روی آن بزنید',
@@ -159,7 +158,8 @@ const fmtUsd = new Intl.NumberFormat(LANG === 'fa' ? 'fa-IR' : 'en-US', { maximu
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const USD_DEC = 1000000n;
 
-const state = { price: 10n * USD_DEC, next: 101n, gifts: 25n, batchLeft: 100000n, toFound: 0n, foundAddr: '', ownerHex: '', treasuryHex: '', tw: null, me: null, usd: 0n, trx: 0n, ep: 0n, allowance: 0n, busy: false };
+const GOLDEN = 2585n;
+const state = { price: 5n * USD_DEC, next: 1n, gifts: 25n, given: 0n, golden: false, batchLeft: 100000n, foundAddr: '', ownerHex: '', treasuryHex: '', tw: null, me: null, usd: 0n, trx: 0n, ep: 0n, allowance: 0n, busy: false };
 
 /* ---------- small helpers ---------- */
 const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
@@ -211,18 +211,58 @@ async function view(selector, paramHex) {
   if (!w) throw new Error('read failed');
   return BigInt('0x' + (w.slice(0, 64) || '0'));
 }
+async function viewWords(selector, paramHex, n) {
+  const hex = b58hex(NET.token);
+  const r = await fetch(NET.api + '/wallet/triggerconstantcontract', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ owner_address: hex, contract_address: hex, function_selector: selector, parameter: paramHex || '' })
+  }).then((x) => x.json());
+  const w = r && r.constant_result && r.constant_result[0];
+  if (!w || w.length < n * 64) throw new Error('read failed');
+  const out = [];
+  for (let i = 0; i < n; i++) out.push(BigInt('0x' + w.slice(i * 64, (i + 1) * 64)));
+  return out;
+}
 async function loadFigures() {
   if (!NET.token) return render();
   try {
-    const [price, next, gifts, left, toFound, fWord, oWord, tWord] = await Promise.all([
+    const [price, next, gifts, left, given, golden, oWord, tWord] = await Promise.all([
       view('pricePerToken()'), view('nextNumber()'), view('giftsRemaining()'), view('saleRemainingInBatch()'),
-      view('totalToFoundation()'), view('foundation()'), view('owner()'), view('treasury()')
+      view('giftsGiven()'), view('goldenClaimed()'), view('owner()'), view('treasury()')
     ]);
     const word = (w) => w.toString(16).padStart(40, '0');
-    Object.assign(state, { price, next, gifts, batchLeft: left, toFound, ownerHex: word(oWord), treasuryHex: word(tWord) });
-    state.foundAddr = fWord === 0n ? '' : await hexToB58('41' + fWord.toString(16).padStart(40, '0'));
+    Object.assign(state, { price, next, gifts, given, golden: golden !== 0n, batchLeft: left, ownerHex: word(oWord), treasuryHex: word(tWord) });
+    state.foundAddr = await hexToB58('41' + word(tWord));
   } catch (e) { /* keep the published defaults if the network is slow */ }
   render();
+  loadWall();
+}
+// Founders' wall: the buyers who received the founders' gift, from the public Purchased events.
+async function loadWall() {
+  const box = $('foundersWall');
+  if (!box || !NET.token) return;
+  try {
+    const r = await fetch(NET.api + '/v1/contracts/' + NET.token + '/events?event_name=Purchased&only_confirmed=true&order_by=block_timestamp,asc&limit=200').then((x) => x.json());
+    const rows = [];
+    for (const ev of (r && r.data) || []) {
+      const res = ev.result || {};
+      if (BigInt(res.foundersGift || '0') !== 1n) continue;
+      let hex = String(res.buyer || '').replace(/^0x/i, '').toLowerCase();
+      if (hex.length === 40) hex = '41' + hex;
+      rows.push({ addr: await hexToB58(hex), top: BigInt(res.firstGiftNumber || '0') });
+    }
+    if (!rows.length) return;
+    box.textContent = '';
+    rows.forEach((w, i) => {
+      const line = document.createElement('div');
+      line.style.cssText = 'display:flex;gap:10px;align-items:baseline;font-size:13px';
+      const n = document.createElement('b'); n.className = 'num'; n.textContent = (i + 1) + '.';
+      const a = document.createElement('code'); a.dir = 'ltr'; a.textContent = w.addr;
+      const g = document.createElement('span'); g.style.color = 'var(--ink-3)'; g.textContent = '#' + fmt.format(Number(w.top));
+      line.appendChild(n); line.appendChild(a); line.appendChild(g);
+      box.appendChild(line);
+    });
+  } catch (e) { /* keep what is shown */ }
 }
 
 /* ---------- rendering ---------- */
@@ -232,18 +272,11 @@ function render() {
   $('heroPrice').textContent = p; $('sPrice').textContent = p; $('dPrice').textContent = p;
   $('sNext').textContent = '#' + fmt.format(Number(state.next));
   $('sGifts').textContent = fmt.format(Number(state.gifts));
-  $('sFound').textContent = usdText(state.toFound);
+  $('sFound').textContent = fmt.format(Number(state.given)) + ' / ' + fmt.format(25);
   const q = qty();
-  const tot = state.price * BigInt(q), half = tot * 50n / 100n;
+  const tot = state.price * BigInt(q);
   $('dTotal').textContent = usdText(tot);
-  $('dFound').textContent = usdText(half);
-  $('dCreator').textContent = usdText(tot - half);
-  const fn = LANG === 'fa' ? CONFIG.foundation.nameFa : CONFIG.foundation.name;
-  document.querySelectorAll('.fName, .fNameCap').forEach((el) => {
-    const text = fn || (el.classList.contains('fNameCap') ? T.fNameCap : T.fName);
-    if (CONFIG.foundation.url && !el.querySelector('a')) el.innerHTML = '<a href="' + CONFIG.foundation.url + '" target="_blank" rel="noopener"></a>';
-    (el.querySelector('a') || el).textContent = text;
-  });
+  $('dCreator').textContent = usdText(tot);
   if (state.foundAddr) $('foundAddr').textContent = state.foundAddr;
   const hint = $('giftHint');
   const g = fmt.format(Number(state.gifts));
@@ -253,6 +286,9 @@ function render() {
   else if (state.gifts > 0n && q >= 5) { hint.className = 'gift-hint'; hint.textContent = T.giftYes(g); }
   else if (state.gifts > 0n) { hint.className = 'gift-hint off'; hint.textContent = T.giftMore(g); }
   else { hint.className = 'gift-hint off'; hint.textContent = T.giftNone; }
+  if (!state.golden && q >= 10 && state.next <= GOLDEN && GOLDEN < state.next + BigInt(q) && !(meHex && (meHex === state.ownerHex || meHex === state.treasuryHex))) {
+    hint.className = 'gift-hint'; hint.textContent += ' ' + T.goldenYes;
+  }
 
   $('netName').textContent = NET_LABEL;
   if (NET.token) { $('tokenAddr').textContent = NET.token; $('scanLink').hidden = false; $('scanLink').href = NET.scan + '/token20/' + NET.token; }
@@ -429,7 +465,11 @@ function showNumbers(info, q) {
   let first = null, last = null, gift = 0n;
   for (const lg of (info && info.log) || []) {
     const d = lg.data || '';
-    if (d.length === 384 || d.length === 320) { gift = BigInt('0x' + d.slice(128, 192)); first = BigInt('0x' + d.slice(192, 256)); last = BigInt('0x' + d.slice(256, 320)); }
+    // Purchased(amount, cost, firstNumber, lastNumber, foundersGift, goldenGift, firstGiftNumber): 7 words
+    if (d.length === 448) {
+      first = BigInt('0x' + d.slice(128, 192)); last = BigInt('0x' + d.slice(192, 256));
+      gift = BigInt('0x' + d.slice(256, 320)) + BigInt('0x' + d.slice(320, 384));
+    }
   }
   const box = $('result');
   if (first !== null) {
@@ -437,7 +477,7 @@ function showNumbers(info, q) {
   } else {
     $('resultNums').textContent = T.nSouvenirs(fmt.format(q));
   }
-  $('resultGift').textContent = gift > 0n ? T.giftOne : '';
+  $('resultGift').textContent = gift > 0n ? T.giftN(fmt.format(Number(gift))) : '';
   box.classList.add('show');
 }
 async function faucet() {

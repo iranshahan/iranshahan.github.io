@@ -53,14 +53,14 @@
       <p class="fa fa-line">پاینده ایران</p>
       <p class="lede">Fifty-three years of building, remembered in a digital gold coin. Made in memory of the javidnaman of the road to freedom, the Iranians who gave their lives for a free Iran.</p>
       <div class="price-row">
-        <span class="big num" id="heroPrice">10 USDT</span>
+        <span class="big num" id="heroPrice">5 USDT</span>
         <span class="small">per souvenir · paid in USDT on TRON (TRC-20)</span>
       </div>
       <div class="ctas">
         <a class="btn btn-gold" href="#buy">Buy your number</a>
         <a class="btn btn-line" href="#story">Read the story</a>
       </div>
-      <p class="fine">Half of every purchase goes straight to <span class="fName">the foundation</span>, in the same transaction. You can check it on the blockchain.</p>
+      <p class="fine">A souvenir, not an investment. Every purchase goes straight from your wallet to the creator's wallet, in the same transaction that sends you the souvenirs. You can check it on the blockchain.</p>
     </div>
     <div class="coin-col">
       <button class="coin" id="heroCoin" type="button" aria-label="Turn the coin over">
@@ -76,10 +76,10 @@
 
 <div class="stats" aria-label="Live edition figures">
   <div class="wrap">
-    <div class="stat"><span class="v num" id="sNext">#101</span><span class="k">Next number on sale</span></div>
-    <div class="stat"><span class="v num" id="sPrice">10 USDT</span><span class="k">Price per souvenir</span></div>
-    <div class="stat"><span class="v num" id="sFound">0 USDT</span><span class="k">Sent to <span class="fName">the foundation</span> so far</span></div>
-    <div class="stat"><span class="v num" id="sGifts">25</span><span class="k">Gifts left for buyers of 5+</span></div>
+    <div class="stat"><span class="v num" id="sNext">#1</span><span class="k">Next number on sale</span></div>
+    <div class="stat"><span class="v num" id="sPrice">5 USDT</span><span class="k">Price per souvenir</span></div>
+    <div class="stat"><span class="v num" id="sFound">0 / 25</span><span class="k">Founders on the wall</span></div>
+    <div class="stat"><span class="v num" id="sGifts">25</span><span class="k">Founder gifts left (buy 5+)</span></div>
   </div>
 </div>
 
@@ -174,7 +174,7 @@
     <p class="fa">جاویدنامان راه آزادی</p>
     <div class="candle-row" aria-hidden="true" id="candles"></div>
     <p class="lead">For every name that was taken, and every name that will not be forgotten.</p>
-    <p class="note">Half of the price of every Iran Shahan goes directly to <span class="fName">the foundation</span>, inside the same transaction. The split is written into the contract and can never be changed.</p>
+    <p class="note">Iran Shahan is a souvenir in their memory. The whole edition is fixed at 2,585,000 and can never grow. Your purchase number is recorded on the blockchain for good.</p>
   </div>
 </section>
 
@@ -229,10 +229,11 @@
     </div>
     <div class="terms-grid">
       <div class="term"><span class="v num">2,585,000</span><span class="k">The whole edition</span><p>Named for the imperial year 2585 on the coin design. The contract created them all at once and has no way to make more.</p></div>
-      <div class="term"><span class="v num">2,000,000</span><span class="k">For sale</span><p>Sold in batches, starting with 100,000. The price starts at 10 USDT. The creator can raise it later but can never set it below 10 USDT, and every change is public on the blockchain.</p></div>
-      <div class="term"><span class="v num">585,000</span><span class="k">The creator's share</span><p>Held by the creator, who can withdraw it at any time. Numbers #1 to #100 belong to this share, so public sales begin at #101.</p></div>
-      <div class="term"><span class="v num">#101+</span><span class="k">Your numbers</span><p>Every souvenir sold gets the next number in line. Your numbers are recorded on the blockchain with your purchase.</p></div>
-      <div class="term"><span class="v num">25</span><span class="k">Gifts</span><p>The first 25 people who buy 5 or more in a single purchase receive one extra souvenir, free, in the same transaction.</p></div>
+      <div class="term"><span class="v num">2,000,000</span><span class="k">For sale</span><p>Sold in batches, starting with 100,000. The price starts at 5 USDT. The creator can raise it later (by at most 25% a step, once a day) but can never set it below 5 USDT, and every change is public on the blockchain.</p></div>
+      <div class="term"><span class="v num">585,000</span><span class="k">The creator's share</span><p>Held by the creator, who can withdraw it at any time. 28 of them are set aside for the gifts below. The creator's wallet and every withdrawal are public on the blockchain.</p></div>
+      <div class="term"><span class="v num">#1+</span><span class="k">Your numbers</span><p>Every souvenir sold gets the next number in line, starting at #1. Your numbers are recorded on the blockchain with your purchase. Gifts are numbered separately, counting down from #2,585,000.</p></div>
+      <div class="term"><span class="v num">25</span><span class="k">Founders</span><p>The first 25 people who buy 5 or more in a single purchase receive one extra souvenir, free, and their wallets are shown on the Founders' wall.</p></div>
+      <div class="term"><span class="v num">#2585</span><span class="k">The golden number</span><p>Whoever's purchase includes number #2585 and buys 10 or more in that purchase receives 3 extra souvenirs, free. It can happen once.</p></div>
       <div class="term"><span class="v num">0</span><span class="k">Limits on what you do next</span><p>Keep it, send it to someone, or sell it. Nothing in the contract stops you.</p></div>
     </div>
   </div>
@@ -257,8 +258,10 @@
           <a class="btn btn-line mini" id="scanLink" href="#" target="_blank" rel="noopener" hidden>View on Tronscan</a>
         </div>
         <span style="color:var(--ink-3);font-size:13px">Always check this address before you buy. Anyone can create a token called EP; only this contract is Iran Shahan.</span>
-        <span class="muted" style="color:var(--ink-3);font-size:14px;margin-top:6px"><span class="fNameCap">The foundation</span>'s wallet, fixed in the contract</span>
+        <span class="muted" style="color:var(--ink-3);font-size:14px;margin-top:6px">Creator wallet (receives every payment)</span>
         <code id="foundAddr">Set before the sale opens</code>
+        <span class="muted" style="color:var(--ink-3);font-size:14px;margin-top:6px">Founders' wall: the first 25 buyers of 5 or more</span>
+        <div id="foundersWall" style="display:flex;flex-direction:column;gap:6px"><span style="color:var(--ink-3);font-size:13px">No founders yet. Be the first.</span></div>
       </div>
     </div>
 
@@ -278,10 +281,9 @@
           <button type="button" id="inc" aria-label="One more">+</button>
         </div>
       </div>
-      <div class="line"><span>Price each</span><b class="num" id="dPrice">10 USDT</b></div>
-      <div class="line total"><span>Total</span><b class="num" id="dTotal">50 USDT</b></div>
-      <div class="line"><span>To <span class="fName">the foundation</span> (50%)</span><b class="num" id="dFound">25 USDT</b></div>
-      <div class="line"><span>To the creator and project costs (50%)</span><b class="num" id="dCreator">25 USDT</b></div>
+      <div class="line"><span>Price each</span><b class="num" id="dPrice">5 USDT</b></div>
+      <div class="line total"><span>Total</span><b class="num" id="dTotal">25 USDT</b></div>
+      <div class="line"><span>Paid straight to the creator's wallet</span><b class="num" id="dCreator">25 USDT</b></div>
       <div class="gift-hint" id="giftHint">Buying 5 or more: you get one extra souvenir free while gifts last.</div>
       <div class="progress" id="progress" hidden><span id="pg1">1 · Allow USDT</span><span id="pg2">2 · Buy</span></div>
       <button class="btn btn-dark" type="button" id="buyBtn" disabled>Connect your wallet to buy</button>
@@ -298,12 +300,12 @@
     <p class="caps">Questions</p>
     <h2 style="margin:12px 0 18px">Before you buy</h2>
     <details><summary>Is this an investment?</summary><p>No. Iran Shahan is a commemorative souvenir. Nobody promises anything about its future price, and you should only buy it because you want to keep it.</p></details>
-    <details><summary>Why does half go to the creator?</summary><p>That half keeps the project alive. It pays for building and running the coin and this website, the network costs, and the small team that gives its time to this work, and part of it is given directly to people in need. Unlike the foundation's half, which the contract sends automatically and can never change, this half is managed by the creator.</p></details>
-    <details><summary>Where does the money go?</summary><p>Half goes straight from your wallet to <span class="fName">the foundation</span>, and half to the creator, in the same transaction that sends you the souvenirs. The foundation's address is fixed in the contract and can never be changed; you can see it below the purchase steps and check every payment on Tronscan.</p></details>
-    <details><summary>What do the numbers mean?</summary><p>Each souvenir sold takes the next number in line, starting at #101. Numbers #1 to #100 belong to the creator's share. Your numbers are written into the blockchain record of your purchase. EP is a regular TRON token, so the number belongs to the purchase record, not to a particular unit in your wallet.</p></details>
+    <details><summary>Where does the money go?</summary><p>All of it goes straight from your wallet to the creator's wallet, in the same transaction that sends you the souvenirs. The contract holds no money. There is no promise about how the creator uses it. You can check every payment on Tronscan.</p></details>
+    <details><summary>Who are the founders and what is the golden number?</summary><p>The first 25 people who buy 5 or more in one purchase get one extra souvenir and a place on the Founders' wall. Number #2585 is the golden number: the purchase that includes it, if it buys 10 or more, receives 3 extra souvenirs. Both are paid from the creator's share and are recorded on the blockchain.</p></details>
+    <details><summary>What do the numbers mean?</summary><p>Each souvenir sold takes the next number in line, starting at #1. Gift souvenirs are numbered separately, counting down from #2,585,000. Your numbers are written into the blockchain record of your purchase. EP is a regular TRON token, so the number belongs to the purchase record, not to a particular unit in your wallet.</p></details>
     <details><summary>Why does my wallet ask twice?</summary><p>The first request lets the souvenir contract take exactly the USDT for this purchase. The second is the purchase. If you buy again later for the same total or less, you may only see the second request.</p></details>
     <details><summary>What are the network fees?</summary><p>TRON charges a fee in TRX for every transaction. It goes to the network, not to the creator. One purchase costs the same fee whether you buy 1 souvenir or 50, so buying several at once is cheaper per souvenir.</p></details>
-    <details><summary>Can the price change?</summary><p>The creator can raise the price but never set it below 10 USDT. If the price changes between opening this page and confirming in your wallet, the purchase stops and nothing is charged.</p></details>
+    <details><summary>Can the price change?</summary><p>The creator can raise the price (at most 25% a step, once a day) but never set it below 5 USDT. If the price changes between opening this page and confirming in your wallet, the purchase stops and nothing is charged.</p></details>
     <details><summary>What if I live in Iran?</summary><p>Please do not buy. Wallets that have been used with exchanges inside Iran can be traced, and this purchase could put you at risk. The best way to help is to share this page with Iranians abroad.</p></details>
     <details><summary>Can I sell my souvenirs?</summary><p>Yes. EP is an ordinary TRON token: the contract puts no limits on it and takes nothing from later sales. You can send it to anyone, or sell it directly to another person at whatever price you agree between you. There is no official marketplace and no promise that someone will want to buy, so only buy what you would be happy to keep.</p></details>
     <details><summary>Can I buy from where I live?</summary><p>Rules on digital tokens and on payments differ from country to country. Please check what applies where you live before you buy. If you are not sure, it is better not to buy. The decision, and the responsibility for it, are yours.</p></details>
@@ -314,7 +316,7 @@
 
 <footer>
   <div class="wrap">
-    <p>Iran Shahan (EP) is a commemorative digital souvenir on the TRON network. It is not an investment or a security, and no promise is made about its value. Every purchase is split in the same transaction: 50% to <span class="fName">the foundation</span>, 50% to the creator for the project's costs and its work. Laws differ from country to country; each buyer is responsible for checking that this purchase is allowed where they live.</p>
+    <p>Iran Shahan (EP) is a commemorative digital souvenir on the TRON network. It is not an investment or a security, and no promise is made about its value. Every purchase is paid in the same transaction directly to the creator's wallet. Laws differ from country to country; each buyer is responsible for checking that this purchase is allowed where they live.</p>
     <p class="fa" style="color:var(--gold)">پاینده ایران</p>
   </div>
 </footer>
@@ -324,6 +326,6 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="app.js?v=4"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
