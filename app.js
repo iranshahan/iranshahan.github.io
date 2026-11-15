@@ -167,8 +167,8 @@ if (!OFFICIAL) {
     b.setAttribute('role', 'alert');
     b.style.cssText = 'position:sticky;top:0;z-index:99999;background:#b00020;color:#fff;padding:12px 16px;text-align:center;font-weight:700';
     b.textContent = LANG === 'fa'
-      ? 'هشدار: این صفحه سایت رسمی ایران شاهان نیست. این‌جا چیزی نخرید. سایت رسمی: iranshahan.github.io'
-      : 'Warning: this is NOT the official Iran Shahan site. Do not buy here. The official site is iranshahan.github.io';
+      ? 'هشدار: این سایت جعلی است و سایت رسمی ایران شاهان نیست. مسئولیت هر خریدی از این‌جا با خود شماست. تنها سایت رسمی: iranshahan.github.io'
+      : 'Warning: this site is FAKE and is not the official Iran Shahan site. Buying here is at your own risk. The only official site is iranshahan.github.io';
     document.body.prepend(b);
   });
 }
