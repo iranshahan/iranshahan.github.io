@@ -275,7 +275,7 @@ async function loadWall() {
       const line = document.createElement('div');
       line.style.cssText = 'display:flex;gap:10px;align-items:baseline;font-size:13px';
       const n = document.createElement('b'); n.className = 'num'; n.textContent = (i + 1) + '.';
-      const a = document.createElement('code'); a.dir = 'ltr'; a.textContent = w.addr;
+      const a = document.createElement('code'); a.dir = 'ltr'; a.textContent = shortAddr(w.addr);
       const g = document.createElement('span'); g.style.color = 'var(--ink-3)'; g.textContent = '#' + fmt.format(Number(w.top));
       line.appendChild(n); line.appendChild(a); line.appendChild(g);
       box.appendChild(line);
