@@ -150,6 +150,24 @@ const WORDS = {
   }
 };
 const T = WORDS[LANG];
+
+/* ---------- copy guard ----------
+   The official site lives only at these addresses. On any other address (a copy or a mirror),
+   a red warning is shown and buying is switched off. A copier can remove this, but it protects
+   people who land on a naive copy. Add your own domain here if you ever get one. */
+const OFFICIAL_HOSTS = ['iranshahan.github.io', 'localhost', '127.0.0.1'];
+const OFFICIAL = OFFICIAL_HOSTS.includes(location.hostname);
+if (!OFFICIAL) {
+  document.addEventListener('DOMContentLoaded', () => {
+    const b = document.createElement('div');
+    b.setAttribute('role', 'alert');
+    b.style.cssText = 'position:sticky;top:0;z-index:99999;background:#b00020;color:#fff;padding:12px 16px;text-align:center;font-weight:700';
+    b.textContent = LANG === 'fa'
+      ? 'هشدار: این صفحه سایت رسمی ایران شاهان نیست. این‌جا چیزی نخرید. سایت رسمی: iranshahan.github.io'
+      : 'Warning: this is NOT the official Iran Shahan site. Do not buy here. The official site is iranshahan.github.io';
+    document.body.prepend(b);
+  });
+}
 const NET_LABEL = T.net[CONFIG.network];
 
 const $ = (id) => document.getElementById(id);
@@ -294,7 +312,8 @@ function render() {
   if (NET.token) { $('tokenAddr').textContent = NET.token; $('scanLink').hidden = false; $('scanLink').href = NET.scan + '/token20/' + NET.token; }
 
   const btn = $('buyBtn');
-  if (!NET.token) { btn.disabled = true; btn.textContent = T.soon; }
+  if (!OFFICIAL) { btn.disabled = true; btn.textContent = LANG === 'fa' ? 'این سایت رسمی نیست' : 'Not the official site'; }
+  else if (!NET.token) { btn.disabled = true; btn.textContent = T.soon; }
   else if (!state.foundAddr) { btn.disabled = true; btn.textContent = T.waitFoundation; }
   else if (!state.me) { btn.disabled = state.busy; btn.textContent = T.connectToBuy; }
   else if (state.busy) { btn.disabled = true; }
@@ -413,6 +432,7 @@ function sendErr(e) {
 }
 
 async function buyFlow() {
+  if (!OFFICIAL) return;
   if (!state.me) return connect();
   if (state.busy) return;
   const q = qty();
