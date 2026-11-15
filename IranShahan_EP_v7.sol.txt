@@ -1,0 +1,553 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+// ============================================================
+//  ایران شاهان (Iran Shahan) — نماد EP — روی Arbitrum One با USDT — نسخه‌ی v7
+//
+//  «این یک یادبود است، نه سرمایه‌گذاری.»
+//
+//  ساختار:
+//  - کل عرضه برای همیشه ۲٬۵۸۵٬۰۰۰ یادبود (به یاد سال ۲۵۸۵)؛ بعداً هیچ یادبودی ساخته نمی‌شود
+//  - ۲٬۰۰۰٬۰۰۰ برای فروش، به صورت دسته‌ای
+//  - ۵۸۵٬۰۰۰ سهم سازنده؛ سازنده هر وقت بخواهد برمی‌دارد (۲۸ تا برای هدیه‌ها کنار می‌ماند: ۲۵ بنیان‌گذاران + ۳ شماره‌ی طلایی)
+//  - قیمت فروش با ۵ تتر شروع می‌شود؛ سازنده می‌تواند بالاترش ببرد (حداکثر ۲۵٪ در هر گام و یک بار در ۲۴ ساعت)،
+//    ولی هیچ‌وقت کمتر از ۵ تتر نمی‌شود و هر تغییر روی شبکه عمومی ثبت می‌شود
+//  - خریدار سقف قیمتی را که قبول دارد اعلام می‌کند؛ اگر قیمت در این فاصله
+//    بالا رفته باشد، خرید انجام نمی‌شود و پولی کم نمی‌شود
+//  - هدیه: ۲۵ نفر اولی که در یک خرید ۵ یادبود یا بیشتر بخرند، ۱ یادبود هدیه می‌گیرند
+//  - شماره‌ی خرید: فروش از شماره‌ی ۱ شروع می‌شود و پیوسته بالا می‌رود (هدیه‌ها در میان آن نمی‌آیند)
+//    شماره‌ی هر خرید روی شبکه ثبت می‌شود (رویداد Purchased). شماره برچسب خرید است و به خود توکن نمی‌چسبد
+//  - شماره‌ی هدیه‌ها از بالا می‌آید: ۲٬۵۸۵٬۰۰۰ و بعد ۲٬۵۸۴٬۹۹۹ و ... (با شماره‌ی خریدها هیچ‌وقت تداخل ندارد)
+//  - شماره‌ی طلایی ۲۵۸۵: خریدی که شماره‌ی ۲۵۸۵ در بازه‌ی آن باشد و ۱۰ یادبود یا بیشتر باشد، ۳ هدیه‌ی ثابت
+//    می‌گیرد (فقط یک بار)
+//  - قیمت فقط به دست سازنده بالا می‌رود (حداکثر ۲۵٪، یک بار در ۲۴ ساعت)
+//  - پول هر خرید در همان تراکنش مستقیم از کیف خریدار به کیف سازنده (treasury) می‌رود؛ قرارداد تتر نگه نمی‌دارد
+//  - در این نسخه هیچ تقسیمی به خیریه یا نهاد دیگر وجود ندارد
+//  - خرید در یک تراکنش با امضای مجوز (buyWithPermit) یا با approve جداگانه (buy)
+//  - هیچ محدودیتی روی فروش یا انتقال خریداران وجود ندارد؛ بازار رسمی در این قرارداد نیست
+//
+//  نکته: پول مستقیم با transferFrom از کیف خریدار به کیف سازنده می‌رود؛ قرارداد هیچ پولی نگه نمی‌دارد.
+//  روی Arbitrum، USDT (نسخه‌ی USDT0) استاندارد permit (EIP-2612) را دارد و ۶ رقم اعشار.
+//
+// ============================================================
+
+// ------------------------------------------------------------------
+//  Includes code from OpenZeppelin Contracts v5.0.2 (MIT License)
+//  https://github.com/OpenZeppelin/openzeppelin-contracts
+//  Context, IERC20Errors, IERC20, IERC20Metadata, ERC20, Ownable and
+//  ReentrancyGuard are copied as-is (comments removed). SafeERC20 is
+//  reduced to the one function this contract uses (safeTransferFrom).
+// ------------------------------------------------------------------
+
+abstract contract Context {
+    function _msgSender() internal view virtual returns (address) {
+        return msg.sender;
+    }
+    function _msgData() internal view virtual returns (bytes calldata) {
+        return msg.data;
+    }
+    function _contextSuffixLength() internal view virtual returns (uint256) {
+        return 0;
+    }
+}
+
+interface IERC20Errors {
+    error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed);
+    error ERC20InvalidSender(address sender);
+    error ERC20InvalidReceiver(address receiver);
+    error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed);
+    error ERC20InvalidApprover(address approver);
+    error ERC20InvalidSpender(address spender);
+}
+
+interface IERC20 {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+    function totalSupply() external view returns (uint256);
+    function balanceOf(address account) external view returns (uint256);
+    function transfer(address to, uint256 value) external returns (bool);
+    function allowance(address owner, address spender) external view returns (uint256);
+    function approve(address spender, uint256 value) external returns (bool);
+    function transferFrom(address from, address to, uint256 value) external returns (bool);
+}
+
+interface IERC20Metadata is IERC20 {
+    function name() external view returns (string memory);
+    function symbol() external view returns (string memory);
+    function decimals() external view returns (uint8);
+}
+
+abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
+    mapping(address account => uint256) private _balances;
+    mapping(address account => mapping(address spender => uint256)) private _allowances;
+    uint256 private _totalSupply;
+    string private _name;
+    string private _symbol;
+    constructor(string memory name_, string memory symbol_) {
+        _name = name_;
+        _symbol = symbol_;
+    }
+    function name() public view virtual returns (string memory) {
+        return _name;
+    }
+    function symbol() public view virtual returns (string memory) {
+        return _symbol;
+    }
+    function decimals() public view virtual returns (uint8) {
+        return 18;
+    }
+    function totalSupply() public view virtual returns (uint256) {
+        return _totalSupply;
+    }
+    function balanceOf(address account) public view virtual returns (uint256) {
+        return _balances[account];
+    }
+    function transfer(address to, uint256 value) public virtual returns (bool) {
+        address owner = _msgSender();
+        _transfer(owner, to, value);
+        return true;
+    }
+    function allowance(address owner, address spender) public view virtual returns (uint256) {
+        return _allowances[owner][spender];
+    }
+    function approve(address spender, uint256 value) public virtual returns (bool) {
+        address owner = _msgSender();
+        _approve(owner, spender, value);
+        return true;
+    }
+    function transferFrom(address from, address to, uint256 value) public virtual returns (bool) {
+        address spender = _msgSender();
+        _spendAllowance(from, spender, value);
+        _transfer(from, to, value);
+        return true;
+    }
+    function _transfer(address from, address to, uint256 value) internal {
+        if (from == address(0)) {
+            revert ERC20InvalidSender(address(0));
+        }
+        if (to == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
+        }
+        _update(from, to, value);
+    }
+    function _update(address from, address to, uint256 value) internal virtual {
+        if (from == address(0)) {
+            _totalSupply += value;
+        } else {
+            uint256 fromBalance = _balances[from];
+            if (fromBalance < value) {
+                revert ERC20InsufficientBalance(from, fromBalance, value);
+            }
+            unchecked {
+                _balances[from] = fromBalance - value;
+            }
+        }
+        if (to == address(0)) {
+            unchecked {
+                _totalSupply -= value;
+            }
+        } else {
+            unchecked {
+                _balances[to] += value;
+            }
+        }
+        emit Transfer(from, to, value);
+    }
+    function _mint(address account, uint256 value) internal {
+        if (account == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
+        }
+        _update(address(0), account, value);
+    }
+    function _burn(address account, uint256 value) internal {
+        if (account == address(0)) {
+            revert ERC20InvalidSender(address(0));
+        }
+        _update(account, address(0), value);
+    }
+    function _approve(address owner, address spender, uint256 value) internal {
+        _approve(owner, spender, value, true);
+    }
+    function _approve(address owner, address spender, uint256 value, bool emitEvent) internal virtual {
+        if (owner == address(0)) {
+            revert ERC20InvalidApprover(address(0));
+        }
+        if (spender == address(0)) {
+            revert ERC20InvalidSpender(address(0));
+        }
+        _allowances[owner][spender] = value;
+        if (emitEvent) {
+            emit Approval(owner, spender, value);
+        }
+    }
+    function _spendAllowance(address owner, address spender, uint256 value) internal virtual {
+        uint256 currentAllowance = allowance(owner, spender);
+        if (currentAllowance != type(uint256).max) {
+            if (currentAllowance < value) {
+                revert ERC20InsufficientAllowance(spender, currentAllowance, value);
+            }
+            unchecked {
+                _approve(owner, spender, currentAllowance - value, false);
+            }
+        }
+    }
+}
+
+abstract contract Ownable is Context {
+    address private _owner;
+    error OwnableUnauthorizedAccount(address account);
+    error OwnableInvalidOwner(address owner);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    constructor(address initialOwner) {
+        if (initialOwner == address(0)) {
+            revert OwnableInvalidOwner(address(0));
+        }
+        _transferOwnership(initialOwner);
+    }
+    modifier onlyOwner() {
+        _checkOwner();
+        _;
+    }
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+    function _checkOwner() internal view virtual {
+        if (owner() != _msgSender()) {
+            revert OwnableUnauthorizedAccount(_msgSender());
+        }
+    }
+    function renounceOwnership() public virtual onlyOwner {
+        _transferOwnership(address(0));
+    }
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        if (newOwner == address(0)) {
+            revert OwnableInvalidOwner(address(0));
+        }
+        _transferOwnership(newOwner);
+    }
+    function _transferOwnership(address newOwner) internal virtual {
+        address oldOwner = _owner;
+        _owner = newOwner;
+        emit OwnershipTransferred(oldOwner, newOwner);
+    }
+}
+
+abstract contract ReentrancyGuard {
+    uint256 private constant NOT_ENTERED = 1;
+    uint256 private constant ENTERED = 2;
+    uint256 private _status;
+    error ReentrancyGuardReentrantCall();
+    constructor() {
+        _status = NOT_ENTERED;
+    }
+    modifier nonReentrant() {
+        _nonReentrantBefore();
+        _;
+        _nonReentrantAfter();
+    }
+    function _nonReentrantBefore() private {
+        if (_status == ENTERED) {
+            revert ReentrancyGuardReentrantCall();
+        }
+        _status = ENTERED;
+    }
+    function _nonReentrantAfter() private {
+        _status = NOT_ENTERED;
+    }
+    function _reentrancyGuardEntered() internal view returns (bool) {
+        return _status == ENTERED;
+    }
+}
+
+interface IERC20Permit {
+    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external;
+}
+
+library SafeERC20 {
+    error SafeERC20FailedOperation(address token);
+    function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {
+        (bool success, bytes memory returndata) = address(token).call(abi.encodeCall(token.transferFrom, (from, to, value)));
+        if (!success) {
+            if (returndata.length > 0) {
+                assembly {
+                    revert(add(32, returndata), mload(returndata))
+                }
+            }
+            revert SafeERC20FailedOperation(address(token));
+        }
+        if (returndata.length == 0) {
+            if (address(token).code.length == 0) {
+                revert SafeERC20FailedOperation(address(token));
+            }
+        } else if (!abi.decode(returndata, (bool))) {
+            revert SafeERC20FailedOperation(address(token));
+        }
+    }
+}
+
+
+contract SouvenirToken is ERC20, Ownable, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
+    // --- اعداد ثابت (بعد از ساخت قرارداد قابل تغییر نیستند) ---
+    uint256 public constant MAX_SUPPLY = 2_585_000;
+    uint256 public constant SALE_ALLOCATION = 2_000_000;
+    uint256 public constant CREATOR_SHARE = 585_000;
+    uint256 public constant START_PRICE_DOLLARS = 5;
+    uint256 public constant GIFT_WINNERS = 25;
+    uint256 public constant GIFT_MIN_PURCHASE = 5;
+    uint256 public constant GOLDEN_NUMBER = 2585;
+    uint256 public constant GOLDEN_MIN_PURCHASE = 10;
+    uint256 public constant GOLDEN_GIFT = 3;
+    uint256 public constant GIFT_RESERVE = GIFT_WINNERS + GOLDEN_GIFT; // 28 از سهم سازنده
+
+    // --- تنظیمات ---
+    IERC20 public immutable paymentToken;   // تتر (در تست: MockUSD)
+    uint256 public immutable oneDollar;     // ۱ تتر، به کوچک‌ترین واحد تتر
+    uint256 public immutable minPrice;      // کف قیمت: ۵ تتر، برای همیشه
+    uint256 public pricePerToken;           // قیمت فعلی هر یادبود، به کوچک‌ترین واحد تتر
+
+    address public treasury;          // کیف پول سازنده: همه‌ی پول فروش به آن می‌رود
+
+    uint256 public saleCap;           // سقف دسته‌ی فعلی فروش
+    uint256 public saleSold;          // تعداد فروخته‌شده تا الان (بدون هدیه‌ها)
+    uint256 public giftsGiven;        // تعداد هدیه‌های داده‌شده
+    uint256 public creatorWithdrawn;  // مقداری که سازنده از سهمش برداشته
+    uint256 public nextNumber;        // شماره‌ی بعدی خرید (از ۱، پیوسته)
+    uint256 public nextGiftNumber;    // شماره‌ی بعدی هدیه (از ۲٬۵۸۵٬۰۰۰ به پایین)
+    bool public goldenClaimed;        // هدیه‌ی شماره‌ی طلایی فقط یک بار داده می‌شود
+
+    mapping(address => bool) public receivedGift;
+
+    // شماره‌های خرید: firstNumber تا lastNumber. هدیه‌ها (اگر بود): از firstGiftNumber به پایین، giftCount عدد.
+    // foundersGift: ۱ اگر هدیه‌ی ۲۵ نفر اول بوده؛ goldenGift: ۳ اگر هدیه‌ی شماره‌ی طلایی بوده
+    event Purchased(
+        address indexed buyer, uint256 amount, uint256 cost,
+        uint256 firstNumber, uint256 lastNumber,
+        uint256 foundersGift, uint256 goldenGift, uint256 firstGiftNumber
+    );
+    event BatchOpened(uint256 newSaleCap);
+    event TreasuryChanged(address indexed newTreasury);
+    event PriceChanged(uint256 oldPrice, uint256 newPrice);
+    event CreatorWithdrawal(address indexed to, uint256 amount);
+
+    constructor(address paymentToken_, address treasury_, uint256 firstBatchCap)
+        ERC20("Iran Shahan", "EP")
+        Ownable(msg.sender)
+    {
+        require(paymentToken_ != address(0) && treasury_ != address(0), "zero address");
+        require(firstBatchCap > 0 && firstBatchCap <= SALE_ALLOCATION, "bad batch");
+        uint8 d = IERC20Metadata(paymentToken_).decimals();
+        require(d >= 2, "bad payment token");
+
+        paymentToken = IERC20(paymentToken_);
+        oneDollar = 10 ** d;
+        minPrice = START_PRICE_DOLLARS * oneDollar;
+        pricePerToken = minPrice;       // شروع با ۵ تتر
+        treasury = treasury_;
+        saleCap = firstBatchCap;
+        nextNumber = 1;
+        nextGiftNumber = MAX_SUPPLY;
+
+        // کل عرضه یک‌بار ساخته می‌شود و هیچ تابعی برای ساخت بیشتر وجود ندارد
+        _mint(address(this), MAX_SUPPLY);
+        emit BatchOpened(firstBatchCap);
+        emit PriceChanged(0, minPrice);
+    }
+
+    // هر توکن یک یادبود کامل است و به اجزای کوچک‌تر تقسیم نمی‌شود
+    function decimals() public pure override returns (uint8) {
+        return 0;
+    }
+
+    // --- خرید ---
+    // خریدار قبلاً باید به این قرارداد اجازه‌ی برداشت تتر داده باشد (approve)
+    // maxPricePerToken: بیشترین قیمتی که خریدار برای هر یادبود قبول دارد.
+    // خرید با approve جداگانه (برای کیف‌هایی که امضای مجوز ندارند)
+    function buy(uint256 amount, uint256 maxPricePerToken) external nonReentrant {
+        _buy(amount, maxPricePerToken);
+    }
+
+    // خرید در یک تراکنش: خریدار مجوز برداشتِ دقیقاً amount * maxPricePerToken را امضا می‌کند (EIP-2612).
+    // اگر کسی امضا را پیش از این تراکنش مصرف کرده باشد، مجوز همان است و خرید ادامه می‌یابد.
+    function buyWithPermit(
+        uint256 amount, uint256 maxPricePerToken,
+        uint256 deadline, uint8 v, bytes32 r, bytes32 s
+    ) external nonReentrant {
+        try IERC20Permit(address(paymentToken)).permit(msg.sender, address(this), amount * maxPricePerToken, deadline, v, r, s) {} catch {}
+        _buy(amount, maxPricePerToken);
+    }
+
+    function _buy(uint256 amount, uint256 maxPricePerToken) internal {
+        require(amount > 0, "amount is zero");
+        require(pricePerToken <= maxPricePerToken, "price changed");
+        require(saleSold + amount <= saleCap, "batch sold out");
+
+        uint256 cost = amount * pricePerToken;
+        saleSold += amount;
+
+        uint256 firstNumber = nextNumber;
+        nextNumber = firstNumber + amount;
+
+        // هدیه‌ها از سهم سازنده‌اند. مالک و کیف سازنده هدیه نمی‌گیرند.
+        bool eligible = msg.sender != owner() && msg.sender != treasury;
+        uint256 foundersGift;
+        uint256 goldenGift;
+        if (eligible) {
+            // ۲۵ نفر اولی که در یک خرید ۵ یادبود یا بیشتر بخرند: ۱ هدیه
+            if (amount >= GIFT_MIN_PURCHASE && giftsGiven < GIFT_WINNERS && !receivedGift[msg.sender]) {
+                foundersGift = 1;
+                giftsGiven += 1;
+                receivedGift[msg.sender] = true;
+            }
+            // شماره‌ی طلایی: بازه‌ی خرید شامل ۲۵۸۵ باشد و ۱۰ یا بیشتر: ۳ هدیه، فقط یک بار
+            if (
+                !goldenClaimed && amount >= GOLDEN_MIN_PURCHASE &&
+                firstNumber <= GOLDEN_NUMBER && GOLDEN_NUMBER < firstNumber + amount
+            ) {
+                goldenGift = GOLDEN_GIFT;
+                goldenClaimed = true;
+            }
+        }
+        uint256 gift = foundersGift + goldenGift;
+        uint256 firstGiftNumber;
+        if (gift > 0) {
+            firstGiftNumber = nextGiftNumber;
+            nextGiftNumber = firstGiftNumber - gift;
+        }
+
+        // پول در همین تراکنش مستقیم از کیف پول خریدار به کیف سازنده می‌رود
+        paymentToken.safeTransferFrom(msg.sender, treasury, cost);
+        _transfer(address(this), msg.sender, amount + gift);
+
+        emit Purchased(msg.sender, amount, cost, firstNumber, nextNumber - 1, foundersGift, goldenGift, firstGiftNumber);
+    }
+
+    // --- کارهای سازنده ---
+
+    // باز کردن دسته‌ی بعدی فروش؛ هیچ‌وقت از ۲ میلیون بیشتر نمی‌شود
+    function openNextBatch(uint256 newSaleCap) external onlyOwner {
+        require(newSaleCap > saleCap && newSaleCap <= SALE_ALLOCATION, "bad batch");
+        saleCap = newSaleCap;
+        emit BatchOpened(newSaleCap);
+    }
+
+    // برداشت از سهم ۵۸۵٬۰۰۰ سازنده (۲۸ تا برای هدیه‌ها کنار می‌ماند)
+    function withdrawCreatorShare(address to, uint256 amount) external onlyOwner {
+        require(to != address(0), "zero address");
+        require(amount > 0, "amount is zero");
+        require(creatorWithdrawn + amount <= CREATOR_SHARE - GIFT_RESERVE, "exceeds creator share");
+        creatorWithdrawn += amount;
+        _transfer(address(this), to, amount);
+        emit CreatorWithdrawal(to, amount);
+    }
+
+    // The creator can raise the price by at most 25% per step and at most once per 24 hours
+    // (the same limit as the automatic raise from resales). Lowering is always allowed, never below 5 USDT.
+    uint256 public lastOwnerRaiseAt;
+    function setPrice(uint256 newPrice) external onlyOwner {
+        _setPriceChecked(newPrice);
+    }
+
+    // همان تغییر قیمت، به سنت: ۵۰۰ = ۵ تتر، ۱۰۰۰ = ۱۰ تتر
+    function setPriceCents(uint256 cents) external onlyOwner {
+        _setPriceChecked(cents * oneDollar / 100);
+    }
+
+    function _setPriceChecked(uint256 newPrice) internal {
+        require(newPrice >= minPrice, "below start price");
+        if (newPrice > pricePerToken) {
+            require(newPrice <= pricePerToken * (100 + MAX_AUTO_RAISE_PERCENT) / 100, "raise too large");
+            require(lastOwnerRaiseAt == 0 || block.timestamp >= lastOwnerRaiseAt + AUTO_RAISE_COOLDOWN, "raise too soon");
+            lastOwnerRaiseAt = block.timestamp;
+        }
+        emit PriceChanged(pricePerToken, newPrice);
+        pricePerToken = newPrice;
+    }
+
+    // The creator's wallet may be replaced at any time. Every change is a public event (TreasuryChanged).
+    function setTreasury(address newTreasury) external onlyOwner {
+        require(newTreasury != address(0), "zero address");
+        treasury = newTreasury;
+        emit TreasuryChanged(newTreasury);
+    }
+
+    // Ownership moves in two steps, so a typo cannot hand the contract to a dead address.
+    address public pendingOwner;
+    event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner);
+
+    function transferOwnership(address newOwner) public override onlyOwner {
+        require(newOwner != address(0), "zero address");
+        pendingOwner = newOwner;
+        emit OwnershipTransferStarted(owner(), newOwner);
+    }
+
+    function acceptOwnership() external {
+        require(msg.sender == pendingOwner, "not the pending owner");
+        pendingOwner = address(0);
+        _transferOwnership(msg.sender);
+    }
+
+    // Giving up ownership would freeze batches and the creator share forever.
+    function renounceOwnership() public pure override {
+        revert("renounce disabled");
+    }
+
+    // قیمت: سقف افزایش در هر گام و فاصله‌ی دو افزایش
+    uint256 public constant MAX_AUTO_RAISE_PERCENT = 25;
+    uint256 public constant AUTO_RAISE_COOLDOWN = 1 days;
+
+    // --- اطلاعات عمومی ---
+    function priceCents() external view returns (uint256) {
+        return pricePerToken * 100 / oneDollar;
+    }
+
+    function saleRemainingInBatch() external view returns (uint256) {
+        return saleCap - saleSold;
+    }
+
+    function giftsRemaining() external view returns (uint256) {
+        return GIFT_WINNERS - giftsGiven;
+    }
+
+    function creatorShareAvailable() external view returns (uint256) {
+        return CREATOR_SHARE - GIFT_RESERVE - creatorWithdrawn;
+    }
+}
+
+
+// دلار آزمایشی با permit، فقط برای تست روی شبکه‌ی آزمایشی (روی شبکه‌ی اصلی Deploy نمی‌شود)
+contract MockUSD is ERC20 {
+    mapping(address => uint256) public nonces;
+    bytes32 public constant PERMIT_TYPEHASH =
+        keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+
+    constructor() ERC20("Mock USD (test only)", "mUSD") {}
+
+    function decimals() public pure override returns (uint8) {
+        return 6;
+    }
+
+    // هر کسی می‌تواند برای تست، دلار آزمایشی بگیرد (عدد را به دلار کامل وارد کنید)
+    function faucet(uint256 wholeDollars) external {
+        _mint(msg.sender, wholeDollars * 10 ** 6);
+    }
+
+    function DOMAIN_SEPARATOR() public view returns (bytes32) {
+        return keccak256(abi.encode(
+            keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+            keccak256(bytes(name())), keccak256("1"), block.chainid, address(this)
+        ));
+    }
+
+    function permit(address owner_, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+        require(block.timestamp <= deadline, "permit expired");
+        bytes32 digest = keccak256(abi.encodePacked(
+            "\x19\x01", DOMAIN_SEPARATOR(),
+            keccak256(abi.encode(PERMIT_TYPEHASH, owner_, spender, value, nonces[owner_]++, deadline))
+        ));
+        address signer = ecrecover(digest, v, r, s);
+        require(signer != address(0) && signer == owner_, "bad signature");
+        _approve(owner_, spender, value);
+    }
+}

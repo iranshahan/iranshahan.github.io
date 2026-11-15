@@ -1,44 +1,46 @@
 /* ============================================================
    SETTINGS — the only part to edit when launching
-   network: 'nile' for testing, 'mainnet' for the real sale.
+   network: 'arbitrum' for the real sale, 'sepolia' for the testnet.
    token:   the EP contract address after you deploy it.
+   deployBlock: the block of the deployment (makes the founders' wall load fast).
    (Shared by index.html in English and fa.html in Persian.)
    ============================================================ */
 const CONFIG = {
-  network: 'nile',
+  network: 'arbitrum',
   networks: {
-    nile: {
-      api: 'https://nile.trongrid.io',
-      scan: 'https://nile.tronscan.org/#',
-      token: '',   // v6 contract not deployed yet. Test with ?token=T... , then put the address here.
-      usdt: 'TSveqAL6wB3G8ksZwmptzz1q6gzK1B4Qom',
-      testDollars: true
-    },
-    mainnet: {
-      api: 'https://api.trongrid.io',
-      scan: 'https://tronscan.org/#',
-      token: '',
-      usdt: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
+    arbitrum: {
+      chainId: 42161, name: 'Arbitrum One',
+      rpc: 'https://arb1.arbitrum.io/rpc', scan: 'https://arbiscan.io',
+      token: '0x2D881cf7f4c5583d676cF280E0C5f430C03691Ee',   // v7 contract on Arbitrum One
+      usdt: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',   // USDT on Arbitrum One (USDT0, 6 decimals)
+      deployBlock: 524508670,
       testDollars: false
+    },
+    sepolia: {
+      chainId: 421614, name: 'Arbitrum Sepolia',
+      rpc: 'https://sepolia-rollup.arbitrum.io/rpc', scan: 'https://sepolia.arbiscan.io',
+      token: '', usdt: '', deployBlock: 0,
+      testDollars: true
     }
-  },
-  fees: { approve: 100000000, buy: 250000000, faucet: 60000000 }  // fee limits in SUN (1 TRX = 1,000,000 SUN)
+  }
 };
-
-const NET = CONFIG.networks[CONFIG.network];
-// On the testnet only, ?token=T... lets you try a freshly deployed contract without editing this file.
+// Only when the page is opened from this computer (localhost): ?net=sepolia&token=0x..&usd=0x.. tests a testnet deployment.
 (function () {
-  if (CONFIG.network !== 'nile') return;
-  const t = new URLSearchParams(location.search).get('token');
-  if (t && /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(t)) NET.token = t;
+  if (!['localhost', '127.0.0.1'].includes(location.hostname)) return;
+  const q = new URLSearchParams(location.search);
+  if (q.get('net') === 'sepolia') CONFIG.network = 'sepolia';
+  const t = q.get('token'), u = q.get('usd');
+  if (/^0x[0-9a-fA-F]{40}$/.test(t || '')) CONFIG.networks[CONFIG.network].token = t;
+  if (/^0x[0-9a-fA-F]{40}$/.test(u || '')) CONFIG.networks[CONFIG.network].usdt = u;
 })();
+const NET = CONFIG.networks[CONFIG.network];
 
 /* ---------- words (English and Persian) ---------- */
 const LANG = document.documentElement.lang === 'fa' ? 'fa' : 'en';
 const WORDS = {
   en: {
     usd: 'USDT',
-    net: { nile: 'Nile testnet', mainnet: 'TRON mainnet' },
+    net: { arbitrum: 'Arbitrum One', sepolia: 'Arbitrum Sepolia testnet' },
     viewTx: 'View the transaction',
     wallEmpty: 'No founders yet. Be the first.',
     giftYes: (g) => 'You qualify for a free extra souvenir and a place on the Founders\' wall if you are among the first 25 buyers of 5 or more (' + g + ' gifts left).',
@@ -51,38 +53,39 @@ const WORDS = {
     connectToBuy: 'Connect your wallet to buy',
     buyFor: (q, a) => 'Buy ' + q + ' for ' + a,
     allowThenBuy: (a) => 'Allow ' + a + ', then buy',
-    noTronLink: 'TronLink was not found. On a computer, install TronLink for Chrome from <a href="https://www.tronlink.org" target="_blank" rel="noopener">tronlink.org</a> and reload this page. On a phone, open this page in the TronLink app\'s browser.',
-    declined: 'You declined the connection in TronLink.',
-    notConnected: 'TronLink did not connect. Unlock TronLink and try again.',
-    notConnectedMsg: (m) => 'TronLink did not connect: ' + m,
-    unlock: 'Unlock TronLink, then press Connect again.',
-    wrongNet: (n) => 'TronLink is on a different network. Switch it to ' + n + ' and press Connect again.',
+    noWallet: 'No wallet found. Install the Trust Wallet extension for Chrome from the Chrome Web Store, or open this page inside the Trust Wallet app\'s browser, then reload this page.',
+    declined: 'You declined the connection in your wallet.',
+    notConnected: 'Your wallet did not connect. Unlock it and try again.',
+    notConnectedMsg: (m) => 'Your wallet did not connect: ' + m,
+    unlock: 'Unlock your wallet, then press Connect again.',
+    wrongNet: (n) => 'Your wallet is on a different network. Switch it to ' + n + ' and press Connect again.',
     connected: (a) => 'Connected: ' + a,
     rPrice: 'The price changed before your purchase went through. Nothing was charged. Check the new price and try again.',
     rSoldOut: 'This batch does not have that many souvenirs left. Choose a smaller number.',
     rNotOpen: 'The sale has not opened yet. Nothing was charged.',
-    rEnergy: 'The network fee ran out before the purchase finished. Add TRX to your wallet and try again.',
-    rNoTrx: 'Your wallet does not have enough TRX for the network fee. Add TRX and try again.',
+    rNoUsd: 'Your wallet does not have enough USDT for this purchase.',
+    rNoEth: 'Your wallet does not have enough ETH for the network fee. Add a little ETH on Arbitrum and try again.',
     rOther: (r) => 'The network did not accept the transaction (' + r + ').',
     notConfirmed: 'The network has not confirmed yet. Check the transaction before trying again.',
     cantPrepare: 'Could not prepare the transaction. Nothing was charged. Please try again.',
     rejected: (r) => 'The network did not accept the transaction (' + r + '). Nothing was charged.',
-    cancelled: 'You cancelled in TronLink. Nothing was charged.',
+    cancelled: 'You cancelled in your wallet. Nothing was charged.',
     priceJust: (p) => 'The price just changed to ' + p + '. Check the total and press the button again.',
     onlyLeft: (n) => 'Only ' + n + ' souvenirs are left in this batch.',
     needs: (a, b) => 'This purchase needs ' + a + '. Your wallet has ' + b + '.',
-    lowTrx: 'Your wallet has less than 20 TRX. The network fee may not be covered; add TRX if the purchase fails.',
+    lowEth: 'Your wallet has very little ETH. The network fee is only a few cents, but you need a little ETH on Arbitrum to pay it.',
     resetting: 'Resetting the old allowance…',
-    confirmReset: 'Confirm in TronLink: reset the previous allowance first.',
-    waiting: 'Waiting for TronLink…',
-    confirmAllow: (a) => 'Confirm in TronLink: allow the souvenir contract to take ' + a + '.',
+    confirmReset: 'Confirm in your wallet: reset the previous allowance first.',
+    waiting: 'Waiting for your wallet…',
+    confirmAllow: (a) => 'Confirm in your wallet: allow the souvenir contract to take ' + a + '.',
+    confirmSign: (a) => 'Sign in your wallet: permission to spend ' + a + '. Signing costs no fee.',
     allowing: 'Allowing…',
-    confirmBuy: (q, a) => 'Confirm in TronLink: buy ' + q + ' for ' + a + '.',
+    confirmBuy: (q, a) => 'Confirm in your wallet: buy ' + q + ' for ' + a + '.',
     buying: 'Buying…',
     done: 'Done. ',
     nSouvenirs: (q) => q + ' souvenir' + (q > 1 ? 's' : ''),
     giftN: (n) => 'Plus ' + n + ' free gift souvenir' + (n === '1' ? '' : 's') + ' in your wallet.',
-    confirmFaucet: 'Confirm in TronLink to receive 100 test dollars.',
+    confirmFaucet: 'Confirm in your wallet to receive 100 test dollars.',
     faucetDone: '100 test dollars added. ',
     capBack: 'Back of the coin. Tap to turn it over',
     capFront: 'Front of the coin. Tap to turn it over',
@@ -94,7 +97,7 @@ const WORDS = {
   },
   fa: {
     usd: 'تتر',
-    net: { nile: 'شبکه‌ی آزمایشی Nile', mainnet: 'شبکه‌ی اصلی ترون' },
+    net: { arbitrum: 'شبکه‌ی Arbitrum One', sepolia: 'شبکه‌ی آزمایشی Arbitrum Sepolia' },
     viewTx: 'دیدن تراکنش',
     wallEmpty: 'هنوز بنیان‌گذاری نیست. اولین نفر باشید.',
     giftYes: (g) => 'اگر جزو ۲۵ نفر اولی باشید که ۵ یادبود یا بیشتر می‌خرند، یک یادبود اضافه هدیه و جایی روی دیوار بنیان‌گذاران می‌گیرید (' + g + ' هدیه مانده).',
@@ -107,38 +110,39 @@ const WORDS = {
     connectToBuy: 'برای خرید، کیف پولتان را وصل کنید',
     buyFor: (q, a) => 'خرید ' + q + ' یادبود به بهای ' + a,
     allowThenBuy: (a) => 'اجازه‌ی ' + a + '، سپس خرید',
-    noTronLink: 'TronLink پیدا نشد. روی کامپیوتر، افزونه‌ی TronLink را برای کروم از <a href="https://www.tronlink.org" target="_blank" rel="noopener">tronlink.org</a> نصب کنید و صفحه را دوباره باز کنید. روی گوشی، این صفحه را در مرورگر داخل اپ TronLink باز کنید.',
-    declined: 'اتصال را در TronLink رد کردید.',
-    notConnected: 'TronLink وصل نشد. قفل TronLink را باز کنید و دوباره امتحان کنید.',
-    notConnectedMsg: (m) => 'TronLink وصل نشد: ' + m,
-    unlock: 'قفل TronLink را باز کنید و دوباره دکمه‌ی اتصال را بزنید.',
-    wrongNet: (n) => 'TronLink روی شبکه‌ی دیگری است. آن را روی ' + n + ' بگذارید و دوباره دکمه‌ی اتصال را بزنید.',
+    noWallet: 'کیف پول پیدا نشد. افزونه‌ی Trust Wallet را از فروشگاه کروم نصب کنید، یا این صفحه را در مرورگر داخل اپ Trust Wallet باز کنید و صفحه را دوباره بارگذاری کنید.',
+    declined: 'اتصال را در کیف پول رد کردید.',
+    notConnected: 'کیف پول وصل نشد. قفلش را باز کنید و دوباره امتحان کنید.',
+    notConnectedMsg: (m) => 'کیف پول وصل نشد: ' + m,
+    unlock: 'قفل کیف پول را باز کنید و دوباره دکمه‌ی اتصال را بزنید.',
+    wrongNet: (n) => 'کیف پول روی شبکه‌ی دیگری است. آن را روی ' + n + ' بگذارید و دوباره دکمه‌ی اتصال را بزنید.',
     connected: (a) => 'وصل شد: ' + a,
     rPrice: 'قیمت پیش از انجام خرید تغییر کرد. هیچ پولی کم نشد. قیمت تازه را ببینید و دوباره امتحان کنید.',
     rSoldOut: 'در این دسته به این تعداد یادبود باقی نمانده است. تعداد کمتری انتخاب کنید.',
     rNotOpen: 'فروش هنوز آغاز نشده است. هیچ پولی کم نشد.',
-    rEnergy: 'کارمزد شبکه پیش از پایان خرید تمام شد. به کیف پولتان TRX اضافه کنید و دوباره امتحان کنید.',
-    rNoTrx: 'کیف پولتان برای کارمزد شبکه TRX کافی ندارد. TRX اضافه کنید و دوباره امتحان کنید.',
+    rNoUsd: 'کیف پولتان برای این خرید تتر کافی ندارد.',
+    rNoEth: 'کیف پولتان برای کارمزد شبکه ETH کافی ندارد. کمی ETH روی شبکه‌ی Arbitrum اضافه کنید و دوباره امتحان کنید.',
     rOther: (r) => 'شبکه تراکنش را نپذیرفت (' + r + ').',
     notConfirmed: 'شبکه هنوز تأیید نکرده است. پیش از تلاش دوباره، تراکنش را بررسی کنید.',
     cantPrepare: 'آماده‌کردن تراکنش ممکن نشد. هیچ پولی کم نشد. دوباره امتحان کنید.',
     rejected: (r) => 'شبکه تراکنش را نپذیرفت (' + r + '). هیچ پولی کم نشد.',
-    cancelled: 'در TronLink لغو کردید. هیچ پولی کم نشد.',
+    cancelled: 'در کیف پول لغو کردید. هیچ پولی کم نشد.',
     priceJust: (p) => 'قیمت همین حالا به ' + p + ' تغییر کرد. جمع را ببینید و دوباره دکمه را بزنید.',
     onlyLeft: (n) => 'در این دسته فقط ' + n + ' یادبود باقی مانده است.',
     needs: (a, b) => 'این خرید ' + a + ' لازم دارد. در کیف پول شما ' + b + ' هست.',
-    lowTrx: 'کیف پولتان کمتر از ۲۰ TRX دارد. ممکن است کارمزد شبکه کافی نباشد؛ اگر خرید انجام نشد، TRX اضافه کنید.',
+    lowEth: 'کیف پولتان ETH خیلی کمی دارد. کارمزد شبکه فقط چند سنت است، ولی برای پرداخت آن کمی ETH روی شبکه‌ی Arbitrum لازم است.',
     resetting: 'در حال صفر کردن اجازه‌ی قبلی…',
-    confirmReset: 'در TronLink تأیید کنید: اول اجازه‌ی قبلی صفر می‌شود.',
-    waiting: 'منتظر تأیید در TronLink…',
-    confirmAllow: (a) => 'در TronLink تأیید کنید: قرارداد یادبود اجازه می‌گیرد ' + a + ' بردارد.',
+    confirmReset: 'در کیف پول تأیید کنید: اول اجازه‌ی قبلی صفر می‌شود.',
+    waiting: 'منتظر تأیید در کیف پول…',
+    confirmAllow: (a) => 'در کیف پول تأیید کنید: قرارداد یادبود اجازه می‌گیرد ' + a + ' بردارد.',
+    confirmSign: (a) => 'در کیف پول امضا کنید: اجازه‌ی خرج کردن ' + a + '. امضا کارمزد ندارد.',
     allowing: 'در حال ثبت اجازه…',
-    confirmBuy: (q, a) => 'در TronLink تأیید کنید: خرید ' + q + ' یادبود به بهای ' + a + '.',
+    confirmBuy: (q, a) => 'در کیف پول تأیید کنید: خرید ' + q + ' یادبود به بهای ' + a + '.',
     buying: 'در حال خرید…',
     done: 'انجام شد. ',
     nSouvenirs: (q) => q + ' یادبود',
     giftN: (n) => n + ' یادبود هدیه‌ی رایگان هم در کیف پولتان است.',
-    confirmFaucet: 'برای دریافت ۱۰۰ دلار آزمایشی، در TronLink تأیید کنید.',
+    confirmFaucet: 'برای دریافت ۱۰۰ دلار آزمایشی، در کیف پول تأیید کنید.',
     faucetDone: '۱۰۰ دلار آزمایشی اضافه شد. ',
     capBack: 'پشت سکه. برای برگرداندن، روی آن بزنید',
     capFront: 'روی سکه. برای برگرداندن، روی آن بزنید',
@@ -169,44 +173,15 @@ if (!OFFICIAL) {
   });
 }
 const NET_LABEL = T.net[CONFIG.network];
-
 const $ = (id) => document.getElementById(id);
 const fmt = new Intl.NumberFormat(LANG === 'fa' ? 'fa-IR' : 'en-US');
 const fmtUsd = new Intl.NumberFormat(LANG === 'fa' ? 'fa-IR' : 'en-US', { maximumFractionDigits: 2 });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const USD_DEC = 1000000n;
-
 const GOLDEN = 2585n;
-const state = { price: 5n * USD_DEC, next: 1n, gifts: 25n, given: 0n, golden: false, batchLeft: 100000n, foundAddr: '', ownerHex: '', treasuryHex: '', tw: null, me: null, usd: 0n, trx: 0n, ep: 0n, allowance: 0n, busy: false };
+const state = { price: 5n * USD_DEC, next: 1n, gifts: 25n, given: 0n, golden: false, batchLeft: 100000n, foundAddr: '', ownerAddr: '', treasuryAddr: '', bp: null, signer: null, me: null, usd: 0n, eth: 0n, ep: 0n, allowance: 0n, permit: undefined, busy: false };
 
 /* ---------- small helpers ---------- */
-const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-function b58hex(s) {
-  let n = 0n;
-  for (const c of s) { const i = B58.indexOf(c); if (i < 0) throw new Error('bad address'); n = n * 58n + BigInt(i); }
-  return n.toString(16).padStart(50, '0').slice(0, 42);
-}
-async function hexToB58(hex) {
-  const bytes = new Uint8Array(hex.match(/../g).map((h) => parseInt(h, 16)));
-  const h1 = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
-  const h2 = new Uint8Array(await crypto.subtle.digest('SHA-256', h1));
-  const all = new Uint8Array(25); all.set(bytes); all.set(h2.slice(0, 4), 21);
-  let n = BigInt('0x' + Array.from(all, (b) => b.toString(16).padStart(2, '0')).join(''));
-  let out = '';
-  while (n > 0n) { out = B58[Number(n % 58n)] + out; n /= 58n; }
-  return out;
-}
-function big(v) {
-  if (v == null) return 0n;
-  if (typeof v === 'object' && !Array.isArray(v) && !v._hex && v[0] !== undefined) v = v[0];
-  if (Array.isArray(v)) v = v[0];
-  if (typeof v === 'bigint') return v;
-  if (typeof v === 'number') return BigInt(Math.floor(v));
-  if (typeof v === 'string') return BigInt(v);
-  if (v._hex) return BigInt(v._hex);
-  if (v.toString) { const s = v.toString(); if (/^(0x)?[0-9a-f]+$/i.test(s)) return BigInt(/^0x/i.test(s) ? s : (/^\d+$/.test(s) ? s : '0x' + s)); }
-  return 0n;
-}
 function usdNum(units) { return fmtUsd.format(Number(units) / 1e6); }
 function usdText(units) { return usdNum(units) + ' ' + T.usd; }
 function shortAddr(a) { return a ? a.slice(0, 6) + '…' + a.slice(-5) : ''; }
@@ -216,41 +191,38 @@ function setStatus(text, kind, html) {
   s.className = 'status show ' + (kind || 'info');
   if (html) s.innerHTML = text; else s.textContent = text;
 }
-function txLink(id) { return '<a href="' + NET.scan + '/transaction/' + id + '" target="_blank" rel="noopener">' + T.viewTx + '</a>'; }
+function txLink(hash) { return '<a href="' + NET.scan + '/tx/' + hash + '" target="_blank" rel="noopener">' + T.viewTx + '</a>'; }
+function lib() { return typeof ethers !== 'undefined'; }
+
+const EP_ABI = [
+  'function pricePerToken() view returns (uint256)', 'function nextNumber() view returns (uint256)',
+  'function giftsRemaining() view returns (uint256)', 'function saleRemainingInBatch() view returns (uint256)',
+  'function giftsGiven() view returns (uint256)', 'function goldenClaimed() view returns (bool)',
+  'function owner() view returns (address)', 'function treasury() view returns (address)',
+  'function balanceOf(address) view returns (uint256)',
+  'function buy(uint256 amount, uint256 maxPricePerToken)',
+  'function buyWithPermit(uint256 amount, uint256 maxPricePerToken, uint256 deadline, uint8 v, bytes32 r, bytes32 s)',
+  'event Purchased(address indexed buyer, uint256 amount, uint256 cost, uint256 firstNumber, uint256 lastNumber, uint256 foundersGift, uint256 goldenGift, uint256 firstGiftNumber)'
+];
+const USD_ABI = [
+  'function balanceOf(address) view returns (uint256)', 'function allowance(address,address) view returns (uint256)',
+  'function approve(address,uint256) returns (bool)', 'function nonces(address) view returns (uint256)',
+  'function name() view returns (string)', 'function DOMAIN_SEPARATOR() view returns (bytes32)',
+  'function faucet(uint256)'
+];
+let _rp = null;
+function reader() { if (!_rp) _rp = new ethers.JsonRpcProvider(NET.rpc, NET.chainId, { staticNetwork: true }); return _rp; }
 
 /* ---------- public figures (no wallet needed) ---------- */
-async function view(selector, paramHex) {
-  const hex = b58hex(NET.token);
-  const r = await fetch(NET.api + '/wallet/triggerconstantcontract', {
-    method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ owner_address: hex, contract_address: hex, function_selector: selector, parameter: paramHex || '' })
-  }).then((x) => x.json());
-  const w = r && r.constant_result && r.constant_result[0];
-  if (!w) throw new Error('read failed');
-  return BigInt('0x' + (w.slice(0, 64) || '0'));
-}
-async function viewWords(selector, paramHex, n) {
-  const hex = b58hex(NET.token);
-  const r = await fetch(NET.api + '/wallet/triggerconstantcontract', {
-    method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ owner_address: hex, contract_address: hex, function_selector: selector, parameter: paramHex || '' })
-  }).then((x) => x.json());
-  const w = r && r.constant_result && r.constant_result[0];
-  if (!w || w.length < n * 64) throw new Error('read failed');
-  const out = [];
-  for (let i = 0; i < n; i++) out.push(BigInt('0x' + w.slice(i * 64, (i + 1) * 64)));
-  return out;
-}
 async function loadFigures() {
-  if (!NET.token) return render();
+  if (!NET.token || !lib()) return render();
   try {
-    const [price, next, gifts, left, given, golden, oWord, tWord] = await Promise.all([
-      view('pricePerToken()'), view('nextNumber()'), view('giftsRemaining()'), view('saleRemainingInBatch()'),
-      view('giftsGiven()'), view('goldenClaimed()'), view('owner()'), view('treasury()')
+    const c = new ethers.Contract(NET.token, EP_ABI, reader());
+    const [price, next, gifts, left, given, golden, owner, treasury] = await Promise.all([
+      c.pricePerToken(), c.nextNumber(), c.giftsRemaining(), c.saleRemainingInBatch(),
+      c.giftsGiven(), c.goldenClaimed(), c.owner(), c.treasury()
     ]);
-    const word = (w) => w.toString(16).padStart(40, '0');
-    Object.assign(state, { price, next, gifts, given, golden: golden !== 0n, batchLeft: left, ownerHex: word(oWord), treasuryHex: word(tWord) });
-    state.foundAddr = await hexToB58('41' + word(tWord));
+    Object.assign(state, { price, next, gifts, batchLeft: left, given, golden, ownerAddr: owner.toLowerCase(), treasuryAddr: treasury.toLowerCase(), foundAddr: treasury });
   } catch (e) { /* keep the published defaults if the network is slow */ }
   render();
   loadWall();
@@ -258,16 +230,14 @@ async function loadFigures() {
 // Founders' wall: the buyers who received the founders' gift, from the public Purchased events.
 async function loadWall() {
   const box = $('foundersWall');
-  if (!box || !NET.token) return;
+  if (!box || !NET.token || !lib()) return;
   try {
-    const r = await fetch(NET.api + '/v1/contracts/' + NET.token + '/events?event_name=Purchased&only_confirmed=true&order_by=block_timestamp,asc&limit=200').then((x) => x.json());
+    const iface = new ethers.Interface(EP_ABI);
+    const logs = await reader().getLogs({ address: NET.token, topics: [iface.getEvent('Purchased').topicHash], fromBlock: NET.deployBlock || 0, toBlock: 'latest' });
     const rows = [];
-    for (const ev of (r && r.data) || []) {
-      const res = ev.result || {};
-      if (BigInt(res.foundersGift || '0') !== 1n) continue;
-      let hex = String(res.buyer || '').replace(/^0x/i, '').toLowerCase();
-      if (hex.length === 40) hex = '41' + hex;
-      rows.push({ addr: await hexToB58(hex), top: BigInt(res.firstGiftNumber || '0') });
+    for (const lg of logs) {
+      const p = iface.parseLog(lg);
+      if (p && p.args.foundersGift === 1n) rows.push({ addr: p.args.buyer, top: p.args.firstGiftNumber });
     }
     if (!rows.length) return;
     box.textContent = '';
@@ -285,6 +255,7 @@ async function loadWall() {
 
 /* ---------- rendering ---------- */
 function qty() { const q = parseInt($('qty').value, 10); return Number.isFinite(q) && q > 0 ? q : 1; }
+function isCreator() { const m = state.me ? state.me.toLowerCase() : ''; return !!m && (m === state.ownerAddr || m === state.treasuryAddr); }
 function render() {
   const p = usdText(state.price);
   $('heroPrice').textContent = p; $('sPrice').textContent = p; $('dPrice').textContent = p;
@@ -298,18 +269,16 @@ function render() {
   if (state.foundAddr) $('foundAddr').textContent = state.foundAddr;
   const hint = $('giftHint');
   const g = fmt.format(Number(state.gifts));
-  let meHex = '';
-  try { meHex = state.me ? b58hex(state.me).slice(2).toLowerCase() : ''; } catch (e) { /* not a TRON address */ }
-  if (meHex && (meHex === state.ownerHex || meHex === state.treasuryHex)) { hint.className = 'gift-hint off'; hint.textContent = T.giftCreator; }
+  if (isCreator()) { hint.className = 'gift-hint off'; hint.textContent = T.giftCreator; }
   else if (state.gifts > 0n && q >= 5) { hint.className = 'gift-hint'; hint.textContent = T.giftYes(g); }
   else if (state.gifts > 0n) { hint.className = 'gift-hint off'; hint.textContent = T.giftMore(g); }
   else { hint.className = 'gift-hint off'; hint.textContent = T.giftNone; }
-  if (!state.golden && q >= 10 && state.next <= GOLDEN && GOLDEN < state.next + BigInt(q) && !(meHex && (meHex === state.ownerHex || meHex === state.treasuryHex))) {
+  if (!state.golden && q >= 10 && state.next <= GOLDEN && GOLDEN < state.next + BigInt(q) && !isCreator()) {
     hint.className = 'gift-hint'; hint.textContent += ' ' + T.goldenYes;
   }
 
   $('netName').textContent = NET_LABEL;
-  if (NET.token) { $('tokenAddr').textContent = NET.token; $('scanLink').hidden = false; $('scanLink').href = NET.scan + '/token20/' + NET.token; }
+  if (NET.token) { $('tokenAddr').textContent = NET.token; $('scanLink').hidden = false; $('scanLink').href = NET.scan + '/token/' + NET.token; }
 
   const btn = $('buyBtn');
   if (!OFFICIAL) { btn.disabled = true; btn.textContent = LANG === 'fa' ? 'این سایت رسمی نیست' : 'Not the official site'; }
@@ -320,116 +289,116 @@ function render() {
   else {
     btn.disabled = false;
     const need = state.price * BigInt(q);
-    btn.textContent = state.allowance >= need ? T.buyFor(fmt.format(q), usdText(need)) : T.allowThenBuy(usdText(need));
+    btn.textContent = T.buyFor(fmt.format(q), usdText(need));
   }
   $('faucetBtn').hidden = !(NET.testDollars && state.me && NET.token);
 }
 
 /* ---------- wallet ---------- */
-function getTW() { return (window.tronLink && window.tronLink.tronWeb) || window.tronWeb || null; }
-function rightNetwork(tw) {
-  const host = (tw.fullNode && tw.fullNode.host) || '';
-  const nile = /nile/i.test(host), shasta = /shasta/i.test(host);
-  return CONFIG.network === 'nile' ? nile : (!nile && !shasta);
+// Wallets announce themselves (EIP-6963). Trust Wallet is preferred; TronLink is never used here.
+const announced = [];
+window.addEventListener('eip6963:announceProvider', (e) => { if (e && e.detail) announced.push(e.detail); });
+window.dispatchEvent(new Event('eip6963:requestProvider'));
+function pickProvider() {
+  const trust = announced.find((a) => a.info && a.info.rdns === 'com.trustwallet.app');
+  if (trust) return trust.provider;
+  const eth = window.ethereum;
+  if (eth) {
+    if (Array.isArray(eth.providers)) { const t = eth.providers.find((x) => x.isTrust || x.isTrustWallet); if (t) return t; }
+    return eth;
+  }
+  const other = announced.find((a) => a.info && a.info.rdns !== 'org.tronlink.www');
+  return other ? other.provider : null;
 }
+async function ensureChain(p) {
+  const want = '0x' + NET.chainId.toString(16);
+  const cur = String(await p.request({ method: 'eth_chainId' })).toLowerCase();
+  if (cur === want) return true;
+  try { await p.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: want }] }); return true; }
+  catch (e) {
+    if (e && e.code === 4902) {
+      try {
+        await p.request({ method: 'wallet_addEthereumChain', params: [{ chainId: want, chainName: NET.name, nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: [NET.rpc], blockExplorerUrls: [NET.scan] }] });
+        return true;
+      } catch (e2) { /* fall through */ }
+    }
+    setStatus(T.wrongNet(NET_LABEL), 'err');
+    return false;
+  }
+}
+let _prov = null;
 async function connect() {
   setStatus('');
-  if (!window.tronLink && !window.tronWeb) { setStatus(T.noTronLink, 'err', true); return; }
+  if (!lib()) { setStatus(T.cantPrepare, 'err'); return; }
+  const p = pickProvider();
+  if (!p) { setStatus(T.noWallet, 'err', true); return; }
+  try { await p.request({ method: 'eth_requestAccounts' }); }
+  catch (e) { setStatus(e && e.code === 4001 ? T.declined : T.notConnectedMsg((e && e.message) || e), 'err'); return; }
+  if (!(await ensureChain(p))) return;
   try {
-    if (window.tronLink && window.tronLink.request) {
-      const res = await window.tronLink.request({ method: 'tron_requestAccounts' });
-      if (res && res.code && res.code !== 200) { setStatus(res.code === 4001 ? T.declined : T.notConnected, 'err'); return; }
-    }
+    state.bp = new ethers.BrowserProvider(p);
+    state.signer = await state.bp.getSigner();
+    state.me = await state.signer.getAddress();
   } catch (e) { setStatus(T.notConnectedMsg((e && e.message) || e), 'err'); return; }
-  let tw = null;
-  for (let i = 0; i < 25; i++) { tw = getTW(); if (tw && tw.defaultAddress && tw.defaultAddress.base58) break; await sleep(150); }
-  if (!tw || !tw.defaultAddress || !tw.defaultAddress.base58) { setStatus(T.unlock, 'err'); return; }
-  if (!rightNetwork(tw)) { setStatus(T.wrongNet(NET_LABEL), 'err'); return; }
-  state.tw = tw; state.me = tw.defaultAddress.base58;
+  if (_prov && _prov.removeListener) { try { _prov.removeListener('accountsChanged', onAcc); _prov.removeListener('chainChanged', onChain); } catch (e) { /* ignore */ } }
+  _prov = p;
+  if (p.on) { p.on('accountsChanged', onAcc); p.on('chainChanged', onChain); }
   $('walletLine').classList.add('on');
   $('walletText').textContent = T.connected(shortAddr(state.me));
   $('connectBtn').hidden = true;
   $('balances').hidden = false;
   await refreshWallet();
 }
-const USD_ABI = [
-  { type: 'function', name: 'balanceOf', stateMutability: 'view', inputs: [{ name: 'a', type: 'address' }], outputs: [{ name: '', type: 'uint256' }] },
-  { type: 'function', name: 'allowance', stateMutability: 'view', inputs: [{ name: 'o', type: 'address' }, { name: 's', type: 'address' }], outputs: [{ name: '', type: 'uint256' }] }
-];
-const EP_ABI = [
-  { type: 'function', name: 'balanceOf', stateMutability: 'view', inputs: [{ name: 'a', type: 'address' }], outputs: [{ name: '', type: 'uint256' }] }
-];
-const usdC = () => state.tw.contract(USD_ABI, NET.usdt);
-const epC = () => state.tw.contract(EP_ABI, NET.token);
+function onAcc() { walletReset(T.walletChanged); }
+function onChain() { walletReset(T.netChanged); }
+function walletReset(msg) { state.me = null; state.signer = null; $('connectBtn').hidden = false; $('balances').hidden = true; $('walletLine').classList.remove('on'); $('walletText').textContent = msg; render(); }
 
 async function refreshWallet() {
-  if (!state.tw || !state.me) return render();
+  if (!state.me) return render();
   try {
-    const [usd, trx, ep, al] = await Promise.all([
-      usdC().balanceOf(state.me).call(),
-      state.tw.trx.getBalance(state.me),
-      NET.token ? epC().balanceOf(state.me).call() : 0,
-      NET.token ? usdC().allowance(state.me, NET.token).call() : 0
+    const u = new ethers.Contract(NET.usdt, USD_ABI, reader());
+    const e = NET.token ? new ethers.Contract(NET.token, EP_ABI, reader()) : null;
+    const [usd, eth, ep, al] = await Promise.all([
+      u.balanceOf(state.me), reader().getBalance(state.me),
+      e ? e.balanceOf(state.me) : 0n, e ? u.allowance(state.me, NET.token) : 0n
     ]);
-    state.usd = big(usd); state.trx = big(trx); state.ep = big(ep); state.allowance = big(al);
+    state.usd = usd; state.eth = eth; state.ep = ep; state.allowance = al;
   } catch (e) { /* balances will refresh on the next action */ }
   $('bUsd').textContent = usdNum(state.usd);
-  $('bTrx').textContent = fmt.format(Number(state.trx / 1000000n));
+  $('bEth').textContent = Number(ethers.formatEther(state.eth)).toFixed(5);
   $('bEp').textContent = fmt.format(Number(state.ep));
   render();
 }
 
 /* ---------- transactions ---------- */
-function hexText(h) { try { return decodeURIComponent(h.replace(/(..)/g, '%$1')); } catch (e) { return ''; } }
-function revertReason(info) {
-  const raw = info && info.contractResult && info.contractResult[0];
-  if (raw && raw.startsWith('08c379a0')) {
-    const len = parseInt(raw.slice(8 + 64, 8 + 128), 16);
-    return hexText(raw.slice(8 + 128, 8 + 128 + len * 2));
-  }
-  if (info && info.receipt && info.receipt.result && info.receipt.result !== 'REVERT') return info.receipt.result;
-  return info && info.resMessage ? hexText(info.resMessage) : 'REVERT';
-}
 function friendly(reason) {
   if (/price changed/i.test(reason)) return T.rPrice;
   if (/batch sold out/i.test(reason)) return T.rSoldOut;
-  if (/sale not open/i.test(reason)) return T.rNotOpen;
-  if (/OUT_OF_ENERGY|OUT_OF_TIME/i.test(reason)) return T.rEnergy;
-  if (/balance is not sufficient|insufficient/i.test(reason)) return T.rNoTrx;
+  if (/insufficient funds|gas required exceeds|intrinsic gas/i.test(reason)) return T.rNoEth;
+  if (/transfer amount exceeds balance|ERC20InsufficientBalance|insufficient balance/i.test(reason)) return T.rNoUsd;
   return T.rOther(reason);
 }
-async function waitTx(txid) {
-  for (let i = 0; i < 40; i++) {
-    await sleep(3000);
-    let info = null;
-    try { info = await state.tw.trx.getTransactionInfo(txid); } catch (e) {}
-    if (info && info.id) {
-      if (info.receipt && info.receipt.result === 'SUCCESS') return info;
-      if (!info.receipt || !info.receipt.result) { if (!info.result) return info; }
-      const e = new Error(friendly(revertReason(info))); e.txid = txid; throw e;
-    }
-  }
-  const e = new Error(T.notConfirmed); e.txid = txid; throw e;
-}
-// Build, sign in TronLink and broadcast a contract call.
-// The transaction stays valid for about 10 minutes, so a buyer who takes a while
-// to read the TronLink window does not get "Transaction expired".
-async function sendTx(addr, sel, params, feeLimit) {
-  const tw = state.tw;
-  const b = await tw.transactionBuilder.triggerSmartContract(addr, sel, { feeLimit, callValue: 0 }, params, state.me);
-  if (!b || !b.result || !b.result.result || !b.transaction) throw new Error(T.cantPrepare);
-  let tx = b.transaction;
-  try { tx = await tw.transactionBuilder.extendExpiration(tx, 540); } catch (e) { /* keep the default expiry */ }
-  const signed = await tw.trx.sign(tx);
-  const r = await tw.trx.sendRawTransaction(signed);
-  if (!r || !r.result) throw new Error(T.rejected(hexText((r && r.message) || '') || (r && r.code) || 'unknown'));
-  return signed.txID;
-}
 function sendErr(e) {
-  const m = (e && (e.message || e.error)) || String(e);
-  if (/declined|reject|cancel|denied/i.test(m)) return T.cancelled;
-  return m;
+  if (!e) return T.rOther('unknown');
+  if (e.code === 'ACTION_REJECTED' || e.code === 4001 || /user (rejected|denied)|rejected the request/i.test(String(e.message || ''))) return T.cancelled;
+  const m = e.reason || (e.info && e.info.error && e.info.error.message) || e.shortMessage || e.message || String(e);
+  return friendly(String(m));
 }
+// Does this USDT contract support signed permits? We check that the signing domain we compute matches the contract's own.
+async function permitDomain() {
+  if (state.permit !== undefined) return state.permit;
+  state.permit = null;
+  try {
+    const u = new ethers.Contract(NET.usdt, USD_ABI, reader());
+    const [name, sep] = await Promise.all([u.name(), u.DOMAIN_SEPARATOR()]);
+    for (const version of ['1', '2']) {
+      const dom = { name, version, chainId: NET.chainId, verifyingContract: NET.usdt };
+      if (ethers.TypedDataEncoder.hashDomain(dom).toLowerCase() === String(sep).toLowerCase()) { state.permit = dom; break; }
+    }
+  } catch (e) { state.permit = null; }
+  return state.permit;
+}
+const PERMIT_TYPES = { Permit: [{ name: 'owner', type: 'address' }, { name: 'spender', type: 'address' }, { name: 'value', type: 'uint256' }, { name: 'nonce', type: 'uint256' }, { name: 'deadline', type: 'uint256' }] };
 
 async function buyFlow() {
   if (!OFFICIAL) return;
@@ -443,54 +412,75 @@ async function buyFlow() {
   if (state.price !== priceSeen) { setStatus(T.priceJust(usdText(state.price)), 'err'); return; }
   if (BigInt(q) > state.batchLeft) { setStatus(T.onlyLeft(fmt.format(Number(state.batchLeft))), 'err'); return; }
   if (state.usd < need) { setStatus(T.needs(usdText(need), usdText(state.usd)), 'err'); return; }
-  if (state.trx < 20n * 1000000n) setStatus(T.lowTrx, 'info');
+  if (state.eth < 50000000000000n) setStatus(T.lowEth, 'info');   // under 0.00005 ETH
 
   state.busy = true; render();
   const pg = $('progress'); pg.hidden = false;
-  $('pg1').className = state.allowance >= need ? 'done' : 'now'; $('pg2').className = '';
+  $('pg1').className = 'now'; $('pg2').className = '';
   try {
-    if (state.allowance < need) {
-      if (state.allowance > 0n) {
-        $('buyBtn').textContent = T.resetting;
-        setStatus(T.confirmReset, 'info');
-        const t0 = await sendTx(NET.usdt, 'approve(address,uint256)', [{ type: 'address', value: NET.token }, { type: 'uint256', value: '0' }], CONFIG.fees.approve);
-        await waitTx(t0);
+    const ep = new ethers.Contract(NET.token, EP_ABI, state.signer);
+    const usd = new ethers.Contract(NET.usdt, USD_ABI, state.signer);
+    let tx = null;
+    if (state.allowance >= need) {
+      $('pg1').className = 'done'; $('pg2').className = 'now';
+      $('buyBtn').textContent = T.waiting; setStatus(T.confirmBuy(fmt.format(q), usdText(need)), 'info');
+      tx = await ep.buy(q, priceSeen);
+    } else {
+      const dom = await permitDomain();
+      let signed = null;
+      if (dom) {
+        try {
+          const nonce = await new ethers.Contract(NET.usdt, USD_ABI, reader()).nonces(state.me);
+          const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
+          $('buyBtn').textContent = T.waiting; setStatus(T.confirmSign(usdText(need)), 'info');
+          const sig = ethers.Signature.from(await state.signer.signTypedData(dom, PERMIT_TYPES, { owner: state.me, spender: NET.token, value: priceSeen * BigInt(q), nonce, deadline }));
+          signed = { deadline, sig };
+        } catch (e) {
+          if (e && (e.code === 'ACTION_REJECTED' || e.code === 4001)) throw e;
+          signed = null;   // the wallet cannot sign this way: use the two-step way below
+        }
       }
-      $('buyBtn').textContent = T.waiting;
-      setStatus(T.confirmAllow(usdText(need)), 'info');
-      const t1 = await sendTx(NET.usdt, 'approve(address,uint256)', [{ type: 'address', value: NET.token }, { type: 'uint256', value: need.toString() }], CONFIG.fees.approve);
-      $('buyBtn').textContent = T.allowing;
-      await waitTx(t1);
-      state.allowance = need;
+      if (signed) {
+        $('pg1').className = 'done'; $('pg2').className = 'now';
+        $('buyBtn').textContent = T.waiting; setStatus(T.confirmBuy(fmt.format(q), usdText(need)), 'info');
+        tx = await ep.buyWithPermit(q, priceSeen, signed.deadline, signed.sig.v, signed.sig.r, signed.sig.s);
+      } else {
+        if (state.allowance > 0n) {
+          $('buyBtn').textContent = T.resetting; setStatus(T.confirmReset, 'info');
+          await (await usd.approve(NET.token, 0n)).wait();
+        }
+        $('buyBtn').textContent = T.waiting; setStatus(T.confirmAllow(usdText(need)), 'info');
+        const t1 = await usd.approve(NET.token, need);
+        $('buyBtn').textContent = T.allowing;
+        await t1.wait();
+        $('pg1').className = 'done'; $('pg2').className = 'now';
+        $('buyBtn').textContent = T.waiting; setStatus(T.confirmBuy(fmt.format(q), usdText(need)), 'info');
+        tx = await ep.buy(q, priceSeen);
+      }
     }
-    $('pg1').className = 'done'; $('pg2').className = 'now';
-    $('buyBtn').textContent = T.waiting;
-    setStatus(T.confirmBuy(fmt.format(q), usdText(need)), 'info');
-    const t2 = await sendTx(NET.token, 'buy(uint256,uint256)', [{ type: 'uint256', value: String(q) }, { type: 'uint256', value: priceSeen.toString() }], CONFIG.fees.buy);
     $('buyBtn').textContent = T.buying;
-    const info = await waitTx(t2);
+    const rc = await tx.wait();
     $('pg2').className = 'done';
-    showNumbers(info, q);
-    setStatus(T.done + txLink(t2), 'ok', true);
+    showNumbers(rc, q);
+    setStatus(T.done + txLink(tx.hash), 'ok', true);
   } catch (e) {
-    const msg = e && e.txid ? (e.message + ' ' + txLink(e.txid)) : sendErr(e);
-    setStatus(msg, 'err', !!(e && e.txid));
+    setStatus(sendErr(e), 'err');
   } finally {
     state.busy = false;
     await loadFigures();
     await refreshWallet();
   }
 }
-function showNumbers(info, q) {
+function showNumbers(rc, q) {
   let first = null, last = null, gift = 0n;
-  for (const lg of (info && info.log) || []) {
-    const d = lg.data || '';
-    // Purchased(amount, cost, firstNumber, lastNumber, foundersGift, goldenGift, firstGiftNumber): 7 words
-    if (d.length === 448) {
-      first = BigInt('0x' + d.slice(128, 192)); last = BigInt('0x' + d.slice(192, 256));
-      gift = BigInt('0x' + d.slice(256, 320)) + BigInt('0x' + d.slice(320, 384));
+  try {
+    const iface = new ethers.Interface(EP_ABI);
+    for (const lg of (rc && rc.logs) || []) {
+      if (String(lg.address).toLowerCase() !== NET.token.toLowerCase()) continue;
+      let p = null; try { p = iface.parseLog(lg); } catch (e) { p = null; }
+      if (p && p.name === 'Purchased') { first = p.args.firstNumber; last = p.args.lastNumber; gift = p.args.foundersGift + p.args.goldenGift; }
     }
-  }
+  } catch (e) { /* show the plain count instead */ }
   const box = $('result');
   if (first !== null) {
     $('resultNums').textContent = first === last ? '#' + fmt.format(Number(first)) : '#' + fmt.format(Number(first)) + ' – #' + fmt.format(Number(last));
@@ -505,11 +495,11 @@ async function faucet() {
   state.busy = true; render();
   try {
     setStatus(T.confirmFaucet, 'info');
-    const t = await sendTx(NET.usdt, 'faucet(uint256)', [{ type: 'uint256', value: '100' }], CONFIG.fees.faucet);
-    await waitTx(t);
-    setStatus(T.faucetDone + txLink(t), 'ok', true);
+    const tx = await new ethers.Contract(NET.usdt, USD_ABI, state.signer).faucet(100);
+    await tx.wait();
+    setStatus(T.faucetDone + txLink(tx.hash), 'ok', true);
   } catch (e) {
-    setStatus(e && e.txid ? e.message + ' ' + txLink(e.txid) : sendErr(e), 'err', !!(e && e.txid));
+    setStatus(sendErr(e), 'err');
   } finally { state.busy = false; await refreshWallet(); }
 }
 
@@ -539,19 +529,8 @@ $('copyAddr').addEventListener('click', async () => {
   catch (e) { const r = document.createRange(); r.selectNodeContents($('tokenAddr')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $('copyAddr').textContent = T.selected; }
   setTimeout(() => { $('copyAddr').textContent = T.copy; }, 2200);
 });
-function walletReset(msg) { state.me = null; $('connectBtn').hidden = false; $('balances').hidden = true; $('walletLine').classList.remove('on'); $('walletText').textContent = msg; render(); }
-window.addEventListener('message', (e) => {
-  const a = e && e.data && e.data.message && e.data.message.action;
-  if (a === 'setAccount' || a === 'setNode' || a === 'accountsChanged' || a === 'disconnect') {
-    setTimeout(() => {
-      const tw = getTW();
-      if (state.me && tw && tw.defaultAddress && tw.defaultAddress.base58 && tw.defaultAddress.base58 !== state.me) walletReset(T.walletChanged);
-      if (a === 'setNode' && state.me) walletReset(T.netChanged);
-    }, 300);
-  }
-});
 (function candles() { const row = $('candles'); for (let i = 0; i < 53; i++) { const d = document.createElement('i'); d.style.animationDelay = (i * 0.37 % 4).toFixed(2) + 's'; row.appendChild(d); } })();
-if (CONFIG.network === 'nile') $('ribbon').hidden = false;
+if (CONFIG.network !== 'arbitrum') $('ribbon').hidden = false;
 render();
 loadFigures();
 setInterval(loadFigures, 30000);
