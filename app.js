@@ -265,8 +265,7 @@ function render() {
   const q = qty();
   const tot = state.price * BigInt(q);
   $('dTotal').textContent = usdText(tot);
-  $('dCreator').textContent = usdText(tot);
-  if (state.foundAddr) $('foundAddr').textContent = state.foundAddr;
+  if (state.foundAddr && $('foundAddr')) $('foundAddr').textContent = state.foundAddr;
   const hint = $('giftHint');
   const g = fmt.format(Number(state.gifts));
   if (isCreator()) { hint.className = 'gift-hint off'; hint.textContent = T.giftCreator; }

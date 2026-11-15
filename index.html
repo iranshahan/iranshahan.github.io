@@ -62,7 +62,7 @@
         <a class="btn btn-gold" href="#buy">Buy your number</a>
         <a class="btn btn-line" href="#story">Read the story</a>
       </div>
-      <p class="fine">A souvenir, not an investment. Every purchase goes straight from your wallet to the creator's wallet, in the same transaction that sends you the souvenirs. You can check it on the blockchain.</p>
+      <p class="fine">A souvenir, not an investment. Every purchase is recorded on the blockchain, and your souvenirs arrive in the same transaction.</p>
     </div>
     <div class="coin-col">
       <button class="coin" id="heroCoin" type="button" aria-label="Turn the coin over">
@@ -259,8 +259,6 @@
           <a class="btn btn-line mini" id="scanLink" href="#" target="_blank" rel="noopener" hidden>View on Arbiscan</a>
         </div>
         <span style="color:var(--ink-3);font-size:13px">Always check this address before you buy. Anyone can create a token called EP; only this contract is Iran Shahan.</span>
-        <span class="muted" style="color:var(--ink-3);font-size:14px;margin-top:6px">Creator wallet (receives every payment)</span>
-        <code id="foundAddr">Set before the sale opens</code>
         <span class="muted" style="color:var(--ink-3);font-size:14px;margin-top:6px">Founders' wall: the first 25 buyers of 5 or more (wallet addresses are shown in shortened form)</span>
         <div id="foundersWall" style="display:flex;flex-direction:column;gap:6px"><span style="color:var(--ink-3);font-size:13px">No founders yet. Be the first.</span></div>
       </div>
@@ -284,7 +282,6 @@
       </div>
       <div class="line"><span>Price each</span><b class="num" id="dPrice">5 USDT</b></div>
       <div class="line total"><span>Total</span><b class="num" id="dTotal">25 USDT</b></div>
-      <div class="line"><span>Paid straight to the creator's wallet</span><b class="num" id="dCreator">25 USDT</b></div>
       <div class="gift-hint" id="giftHint">Buying 5 or more: you get one extra souvenir free while gifts last.</div>
       <div class="progress" id="progress" hidden><span id="pg1">1 · Allow USDT</span><span id="pg2">2 · Buy</span></div>
       <button class="btn btn-dark" type="button" id="buyBtn" disabled>Connect your wallet to buy</button>
@@ -301,7 +298,6 @@
     <p class="caps">Questions</p>
     <h2 style="margin:12px 0 18px">Before you buy</h2>
     <details><summary>Is this an investment?</summary><p>No. Iran Shahan is a commemorative souvenir. Nobody promises anything about its future price, and you should only buy it because you want to keep it.</p></details>
-    <details><summary>Where does the money go?</summary><p>All of it goes straight from your wallet to the creator's wallet, in the same transaction that sends you the souvenirs. The contract holds no money. There is no promise about how the creator uses it. You can check every payment on Arbiscan.</p></details>
     <details><summary>Who are the founders and what is the golden number?</summary><p>The first 25 people who buy 5 or more in one purchase get one extra souvenir and a place on the Founders' wall. Number #2585 is the golden number: the purchase that includes it, if it buys 10 or more, receives 3 extra souvenirs. Both are paid from the creator's share and are recorded on the blockchain.</p></details>
     <details><summary>What do the numbers mean?</summary><p>Each souvenir sold takes the next number in line, starting at #1. Gift souvenirs are numbered separately, counting down from #2,585,000. Your numbers are written into the blockchain record of your purchase. EP is a regular token on Arbitrum, so the number belongs to the purchase record, not to a particular unit in your wallet.</p></details>
     <details><summary>Why does my wallet ask twice?</summary><p>The first request lets the souvenir contract take exactly the USDT for this purchase. The second is the purchase. If you buy again later for the same total or less, you may only see the second request.</p></details>
@@ -317,7 +313,7 @@
 
 <footer>
   <div class="wrap">
-    <p>Iran Shahan (EP) is a commemorative digital souvenir on the Arbitrum network. It is not an investment or a security, and no promise is made about its value. Every purchase is paid in the same transaction directly to the creator's wallet. Laws differ from country to country; each buyer is responsible for checking that this purchase is allowed where they live.</p>
+    <p>Iran Shahan (EP) is a commemorative digital souvenir on the Arbitrum network. It is not an investment or a security, and no promise is made about its value. Laws differ from country to country; each buyer is responsible for checking that this purchase is allowed where they live.</p>
     <p style="font-family:var(--display);font-weight:600;font-size:28px;color:var(--gold)">May Iran endure</p>
   </div>
 </footer>
@@ -328,6 +324,6 @@
 </div>
 
 <script src="ethers.umd.min.js?v=6.13.4"></script>
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>
