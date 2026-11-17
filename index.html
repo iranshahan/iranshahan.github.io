@@ -276,12 +276,12 @@
         <label for="qty" class="muted" style="display:block;margin-bottom:6px">How many souvenirs</label>
         <div class="qty">
           <button type="button" id="dec" aria-label="One fewer">−</button>
-          <input id="qty" type="number" inputmode="numeric" min="1" step="1" value="5">
+          <input id="qty" type="number" inputmode="numeric" min="1" step="1" value="1">
           <button type="button" id="inc" aria-label="One more">+</button>
         </div>
       </div>
       <div class="line"><span>Price each</span><b class="num" id="dPrice">5 USDT</b></div>
-      <div class="line total"><span>Total</span><b class="num" id="dTotal">25 USDT</b></div>
+      <div class="line total"><span>Total</span><b class="num" id="dTotal">5 USDT</b></div>
       <div class="gift-hint" id="giftHint">Buying 5 or more: you get one extra souvenir free while gifts last.</div>
       <div class="progress" id="progress" hidden><span id="pg1">1 · Allow USDT</span><span id="pg2">2 · Buy</span></div>
       <button class="btn btn-dark" type="button" id="buyBtn" disabled>Connect your wallet to buy</button>
@@ -324,6 +324,6 @@
 </div>
 
 <script src="ethers.umd.min.js?v=6.13.4"></script>
-<script src="app.js?v=9"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>
