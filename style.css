@@ -305,3 +305,5 @@ body::after {
 .pledge-lead { margin-top: 6px; font-size: clamp(16px, 1.75vw, 19px); font-weight: 700; line-height: 1.75; color: var(--ink); }
 .pledge-note { margin-top: 8px; font-size: 14px; line-height: 1.8; color: var(--ink-2); }
 @media (max-width: 560px) { .pledge-card { flex-direction: column; text-align: center; } }
+.pledge-wallet { margin-top: 8px; font-size: 15px; font-weight: 700; line-height: 1.7; color: var(--ink); }
+.pledge-wallet a { display: inline-block; max-width: 100%; color: var(--gold-hi); font-family: ui-monospace, Consolas, monospace; font-size: 14px; overflow-wrap: anywhere; unicode-bidi: isolate; }
