@@ -172,6 +172,25 @@ if (!OFFICIAL) {
     document.body.prepend(b);
   });
 }
+/* Visit counter: one plain image request to GoatCounter. No outside code runs on this page,
+   and wallet addresses and purchase amounts are never sent. Copies on other hosts send nothing. */
+function track(name) {
+  if (location.hostname !== 'iranshahan.github.io') return;
+  try {
+    const q = new URLSearchParams({ rnd: String(Math.random()).slice(2) });
+    if (name) {
+      q.set('p', name + '-' + LANG); q.set('t', name + ' (' + LANG + ')'); q.set('e', 'true');
+    } else {
+      q.set('p', location.pathname); q.set('t', document.title);
+      q.set('s', [screen.width, screen.height, window.devicePixelRatio || 1].join(','));
+      let from = '';
+      try { from = document.referrer ? new URL(document.referrer).origin : ''; } catch (e) { from = ''; }
+      if (from && from !== location.origin) q.set('r', from);
+    }
+    new Image().src = 'https://iranshahanep.goatcounter.com/count?' + q.toString();
+  } catch (e) { /* counting must never affect the page */ }
+}
+track();
 const NET_LABEL = T.net[CONFIG.network];
 const $ = (id) => document.getElementById(id);
 const fmt = new Intl.NumberFormat(LANG === 'fa' ? 'fa-IR' : 'en-US');
@@ -327,6 +346,7 @@ async function ensureChain(p) {
 }
 let _prov = null;
 async function connect() {
+  track('connect-click');
   setStatus('');
   if (!lib()) { setStatus(T.cantPrepare, 'err'); return; }
   const p = pickProvider();
@@ -341,6 +361,7 @@ async function connect() {
   } catch (e) { setStatus(T.notConnectedMsg((e && e.message) || e), 'err'); return; }
   if (_prov && _prov.removeListener) { try { _prov.removeListener('accountsChanged', onAcc); _prov.removeListener('chainChanged', onChain); } catch (e) { /* ignore */ } }
   _prov = p;
+  track('wallet-connected');
   if (p.on) { p.on('accountsChanged', onAcc); p.on('chainChanged', onChain); }
   $('walletLine').classList.add('on');
   $('walletText').textContent = T.connected(shortAddr(state.me));
@@ -403,6 +424,7 @@ async function buyFlow() {
   if (!OFFICIAL) return;
   if (!state.me) return connect();
   if (state.busy) return;
+  track('buy-click');
   const q = qty();
   const priceSeen = state.price;
   const need = priceSeen * BigInt(q);
@@ -460,6 +482,7 @@ async function buyFlow() {
     $('buyBtn').textContent = T.buying;
     const rc = await tx.wait();
     $('pg2').className = 'done';
+    track('purchase-done');
     showNumbers(rc, q);
     setStatus(T.done + txLink(tx.hash), 'ok', true);
   } catch (e) {
