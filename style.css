@@ -295,3 +295,13 @@ body::after {
 .memorial { background: rgba(7, 13, 30, 0.74); }
 .wish { background: radial-gradient(ellipse 60% 70% at 50% 42%, rgba(226,174,62,0.2), transparent 70%), rgba(8, 16, 42, 0.70); }
 .hero { background: radial-gradient(ellipse 70% 60% at 72% 40%, rgba(226,174,62,0.13), transparent 70%), rgba(10,19,41,0.35); }
+
+/* Charity pledge: the first thing on the page */
+.pledge { padding-block: clamp(10px, 1.6vw, 16px); background: rgba(10, 19, 41, 0.94); }
+.pledge-card { display: flex; align-items: center; gap: clamp(14px, 2vw, 22px); padding: clamp(16px, 2.2vw, 24px) clamp(16px, 2.8vw, 30px); border: 1.5px solid var(--gold); border-radius: 18px; background: radial-gradient(ellipse 80% 130% at 50% 0%, rgba(226, 174, 62, 0.24), transparent 72%), linear-gradient(180deg, #1B2B58, #101D3E); box-shadow: inset 0 0 0 1px rgba(245, 214, 140, 0.16), 0 14px 34px rgba(0, 0, 0, 0.42); }
+.pledge-icon { flex: 0 0 auto; display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; color: #7A1420; background: linear-gradient(180deg, var(--gold-hi), var(--gold)); box-shadow: 0 6px 18px rgba(226, 174, 62, 0.35); }
+.pledge-icon svg { width: 28px; height: 28px; }
+.pledge-title { font-size: clamp(20px, 2.5vw, 27px); font-weight: 800; line-height: 1.35; color: var(--gold-hi); }
+.pledge-lead { margin-top: 6px; font-size: clamp(16px, 1.75vw, 19px); font-weight: 700; line-height: 1.75; color: var(--ink); }
+.pledge-note { margin-top: 8px; font-size: 14px; line-height: 1.8; color: var(--ink-2); }
+@media (max-width: 560px) { .pledge-card { flex-direction: column; text-align: center; } }

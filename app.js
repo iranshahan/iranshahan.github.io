@@ -172,6 +172,16 @@ if (!OFFICIAL) {
     document.body.prepend(b);
   });
 }
+/* Always open at the very top of the page, unless a link points straight to the buy section. */
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+if (location.hash && location.hash !== '#buy') history.replaceState(null, '', location.pathname + location.search);
+let visitorMoved = false;
+['wheel', 'touchstart', 'keydown', 'mousedown'].forEach((ev) => window.addEventListener(ev, () => { visitorMoved = true; }, { once: true, passive: true }));
+function openAtTop() { if (!location.hash && !visitorMoved) window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }
+openAtTop();
+window.addEventListener('load', openAtTop);
+window.addEventListener('pageshow', (e) => { if (e.persisted) { visitorMoved = false; openAtTop(); } });
+
 /* Visit counter: one plain image request to GoatCounter. No outside code runs on this page,
    and wallet addresses and purchase amounts are never sent. Copies on other hosts send nothing. */
 function track(name) {
