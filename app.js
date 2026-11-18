@@ -201,6 +201,26 @@ function track(name) {
   } catch (e) { /* counting must never affect the page */ }
 }
 track();
+
+/* Referral links: iranshahan.github.io/?ref=abc123
+   The code is remembered in this browser for 30 days and added to the end of the purchase
+   transaction, where the contract ignores it. It does not change the price or what the buyer receives. */
+const REF = (function () {
+  const valid = /^[a-z0-9]{6}$/;
+  const fromUrl = (new URLSearchParams(location.search).get('ref') || '').toLowerCase();
+  try {
+    if (valid.test(fromUrl)) { localStorage.setItem('ep-ref', JSON.stringify({ c: fromUrl, t: Date.now() })); return fromUrl; }
+    const saved = JSON.parse(localStorage.getItem('ep-ref') || 'null');
+    if (saved && valid.test(saved.c) && Date.now() - saved.t < 30 * 86400000) return saved.c;
+  } catch (e) { /* the code is simply not remembered */ }
+  return valid.test(fromUrl) ? fromUrl : '';
+})();
+function refSuffix() { return REF ? '45505246' + Array.from(REF, (ch) => ch.charCodeAt(0).toString(16).padStart(2, '0')).join('') : ''; }
+async function sendBuy(ep, method, args) {
+  if (!REF) return ep[method](...args);
+  const req = await ep[method].populateTransaction(...args);
+  return state.signer.sendTransaction({ to: req.to, data: req.data + refSuffix() });
+}
 const NET_LABEL = T.net[CONFIG.network];
 const $ = (id) => document.getElementById(id);
 const fmt = new Intl.NumberFormat(LANG === 'fa' ? 'fa-IR' : 'en-US');
@@ -455,7 +475,7 @@ async function buyFlow() {
     if (state.allowance >= need) {
       $('pg1').className = 'done'; $('pg2').className = 'now';
       $('buyBtn').textContent = T.waiting; setStatus(T.confirmBuy(fmt.format(q), usdText(need)), 'info');
-      tx = await ep.buy(q, priceSeen);
+      tx = await sendBuy(ep, 'buy', [q, priceSeen]);
     } else {
       const dom = await permitDomain();
       let signed = null;
@@ -474,7 +494,7 @@ async function buyFlow() {
       if (signed) {
         $('pg1').className = 'done'; $('pg2').className = 'now';
         $('buyBtn').textContent = T.waiting; setStatus(T.confirmBuy(fmt.format(q), usdText(need)), 'info');
-        tx = await ep.buyWithPermit(q, priceSeen, signed.deadline, signed.sig.v, signed.sig.r, signed.sig.s);
+        tx = await sendBuy(ep, 'buyWithPermit', [q, priceSeen, signed.deadline, signed.sig.v, signed.sig.r, signed.sig.s]);
       } else {
         if (state.allowance > 0n) {
           $('buyBtn').textContent = T.resetting; setStatus(T.confirmReset, 'info');
@@ -486,7 +506,7 @@ async function buyFlow() {
         await t1.wait();
         $('pg1').className = 'done'; $('pg2').className = 'now';
         $('buyBtn').textContent = T.waiting; setStatus(T.confirmBuy(fmt.format(q), usdText(need)), 'info');
-        tx = await ep.buy(q, priceSeen);
+        tx = await sendBuy(ep, 'buy', [q, priceSeen]);
       }
     }
     $('buyBtn').textContent = T.buying;
